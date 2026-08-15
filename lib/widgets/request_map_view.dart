@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/hexagon_clipper.dart';
+import 'liquid_glass.dart';
 
 /// Interactive map showing a single collection location, with a button to
 /// open the location in the system maps app for navigation.
@@ -33,7 +34,10 @@ class RequestMapView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final point = LatLng(latitude, longitude);
-    return Column(
+    return LiquidGlassCard(
+      padding: const EdgeInsets.all(12),
+      borderRadius: BorderRadius.circular(22),
+      child: Column(
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
@@ -97,7 +101,7 @@ class RequestMapView extends StatelessWidget {
                   right: 8,
                   child: FloatingActionButton.small(
                     heroTag: 'openMapsToggle',
-                    backgroundColor: AppTheme.pureWhite,
+                    backgroundColor: Colors.white.withValues(alpha: 0.85),
                     foregroundColor: AppTheme.primaryGreen,
                     onPressed: _openInMaps,
                     tooltip: 'Open in Maps',
@@ -141,6 +145,7 @@ class RequestMapView extends StatelessWidget {
           ],
         ),
       ],
+      ),
     );
   }
 }

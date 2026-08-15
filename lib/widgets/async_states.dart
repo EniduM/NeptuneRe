@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/api_client.dart';
 import '../theme/app_theme.dart';
+import 'liquid_glass.dart';
 
 /// Shared loading / error / empty states in the Neptune visual style.
 
@@ -13,23 +14,26 @@ class LoadingView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(
-            width: 32,
-            height: 32,
-            child: CircularProgressIndicator(
-              color: AppTheme.primaryGreen,
-              strokeWidth: 3,
+      child: LiquidGlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                color: AppTheme.primaryGreen,
+                strokeWidth: 3,
+              ),
             ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            message,
-            style: GoogleFonts.outfit(fontSize: 13, color: AppTheme.textMuted),
-          ),
-        ],
+            const SizedBox(height: 14),
+            Text(
+              message,
+              style: GoogleFonts.outfit(fontSize: 13, color: AppTheme.textMuted),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -46,40 +50,43 @@ class ErrorView extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFEE2E2),
-                borderRadius: BorderRadius.circular(16),
+        child: LiquidGlassCard(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEE2E2),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.cloud_off_rounded,
+                  color: Colors.redAccent,
+                  size: 32,
+                ),
               ),
-              child: const Icon(
-                Icons.cloud_off_rounded,
-                color: Colors.redAccent,
-                size: 32,
+              const SizedBox(height: 14),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.outfit(
+                  fontSize: 14,
+                  color: AppTheme.darkBlack,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
-                fontSize: 14,
-                color: AppTheme.darkBlack,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            if (onRetry != null) ...[
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('Try Again'),
-              ),
+              if (onRetry != null) ...[
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Try Again'),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -103,39 +110,42 @@ class EmptyView extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.mintGreen,
-                shape: BoxShape.circle,
+        child: LiquidGlassCard(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.mintGreen,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 36, color: AppTheme.primaryGreen),
               ),
-              child: Icon(icon, size: 36, color: AppTheme.primaryGreen),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.darkBlack,
-              ),
-            ),
-            if (subtitle.isNotEmpty) ...[
-              const SizedBox(height: 6),
+              const SizedBox(height: 14),
               Text(
-                subtitle,
+                title,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.outfit(
-                  fontSize: 13,
-                  color: AppTheme.textMuted,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.darkBlack,
                 ),
               ),
+              if (subtitle.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.outfit(
+                    fontSize: 13,
+                    color: AppTheme.textMuted,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

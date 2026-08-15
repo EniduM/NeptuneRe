@@ -5,6 +5,7 @@ import '../models/api_models.dart';
 import '../theme/app_theme.dart';
 import '../theme/hexagon_clipper.dart';
 import '../utils/formatters.dart';
+import 'liquid_glass.dart';
 import 'status_chip.dart';
 
 /// Reusable collection-request card used across Collector and Rider flows.
@@ -25,26 +26,16 @@ class RequestCard extends StatelessWidget {
     final collector = request.collector;
     final rider = request.rider;
 
-    return Container(
+    return LiquidGlassCard(
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: AppTheme.pureWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      borderRadius: BorderRadius.circular(18),
+      fillOpacity: 0.60,
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Column(

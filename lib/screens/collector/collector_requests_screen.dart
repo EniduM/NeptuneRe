@@ -6,6 +6,7 @@ import '../../models/api_models.dart';
 import '../../providers/app_state.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/async_states.dart';
+import '../../widgets/liquid_glass.dart';
 import '../../widgets/request_card.dart';
 import 'collector_request_detail_screen.dart';
 
@@ -61,15 +62,11 @@ class _CollectorRequestsScreenState extends State<CollectorRequestsScreen> {
               itemCount: requests.length + (pending.isEmpty ? 0 : 1),
               itemBuilder: (context, index) {
                 if (pending.isNotEmpty && index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppTheme.mintGreen,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
+                  return LiquidGlassCard(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(12),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Row(
                         children: [
                           const Icon(
                             Icons.hourglass_top_rounded,
@@ -89,7 +86,6 @@ class _CollectorRequestsScreenState extends State<CollectorRequestsScreen> {
                           ),
                         ],
                       ),
-                    ),
                   );
                 }
                 final request = requests[index - (pending.isEmpty ? 0 : 1)];

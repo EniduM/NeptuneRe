@@ -19,6 +19,7 @@ class AppState extends ChangeNotifier {
   String? _accessToken;
 
   bool _isRestoring = true;
+  bool _isDemoSession = false;
 
   AppState({
     required this.api,
@@ -30,6 +31,7 @@ class AppState extends ChangeNotifier {
   AuthUser? get currentUser => _currentUser;
   String? get accessToken => _accessToken;
   bool get isAuthenticated => _currentUser != null && _accessToken != null;
+  bool get isDemoSession => _isDemoSession;
   bool get isRestoringSession => _isRestoring;
   bool get isCollector => _currentUser?.isCollector ?? false;
   bool get isRider => _currentUser?.isRider ?? false;
@@ -76,9 +78,24 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Enters the app without a backend session (demo mode). No token is
+  /// stored; API-backed screens will show their offline/error states.
+  Future<void> enterDemoSession({required String role}) async {
+    _accessToken = null;
+    _isDemoSession = true;
+    _currentUser = AuthUser(
+      id: 'demo',
+      loginId: 'DEMO',
+      role: role == 'RIDER' ? 'RIDER' : 'COLLECTOR',
+      status: 'ACTIVE',
+    );
+    notifyListeners();
+  }
+
   Future<void> logout() async {
     _accessToken = null;
     _currentUser = null;
+    _isDemoSession = false;
     await _tokenStorage.clearSession();
     notifyListeners();
   }

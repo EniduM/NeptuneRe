@@ -7,6 +7,7 @@ import 'services/api_client.dart';
 import 'services/api_service.dart';
 import 'services/token_storage.dart';
 import 'theme/app_theme.dart';
+import 'widgets/liquid_glass.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,11 @@ class NeptuneApp extends StatelessWidget {
       title: 'Neptune Recyclers',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      builder: (context, child) {
+        return LiquidGlassBackground(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       home: const SplashScreen(),
     );
   }

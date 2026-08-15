@@ -10,6 +10,7 @@ import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/async_states.dart';
+import '../../widgets/liquid_glass.dart';
 import '../../widgets/request_map_view.dart';
 import '../../widgets/status_chip.dart';
 
@@ -213,13 +214,9 @@ class _CollectorRequestDetailScreenState
       ?cancelled,
     ];
 
-    return Container(
+    return LiquidGlassCard(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.pureWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
+      borderRadius: BorderRadius.circular(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -295,13 +292,9 @@ class _CollectorRequestDetailScreenState
 
   Widget _buildDetails(CollectionRequest request) {
     final rider = request.rider;
-    return Container(
+    return LiquidGlassCard(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.pureWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
+      borderRadius: BorderRadius.circular(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

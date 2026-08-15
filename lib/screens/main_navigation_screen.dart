@@ -32,7 +32,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
 
-    if (!appState.isAuthenticated) {
+    if (!appState.isAuthenticated && !appState.isDemoSession) {
       return const SizedBox.shrink();
     }
 
@@ -125,17 +125,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         children: [
           const NeptuneLogoFooter(compact: true),
           Container(
-            decoration: const BoxDecoration(
-              color: AppTheme.pureWhite,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.62),
               border: Border(
-                top: BorderSide(color: Color(0xFFF3F4F6), width: 1),
+                top: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.82),
+                  width: 1,
+                ),
               ),
             ),
             child: BottomNavigationBar(
               currentIndex: selectedIndex,
               onTap: (i) => setState(() => _currentIndex = i),
               type: BottomNavigationBarType.fixed,
-              backgroundColor: AppTheme.pureWhite,
+              backgroundColor: Colors.transparent,
               selectedItemColor: AppTheme.primaryGreen,
               unselectedItemColor: AppTheme.textMuted,
               selectedLabelStyle: GoogleFonts.outfit(

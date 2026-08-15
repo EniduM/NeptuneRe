@@ -7,6 +7,7 @@ import '../../models/api_models.dart';
 import '../../providers/app_state.dart';
 import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/liquid_glass.dart';
 
 /// Rider: scan the Collector's permanent QR and verify it server-side via
 /// POST /rider/collection-requests/:id/verify-qr.
@@ -211,14 +212,10 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
             ),
 
             // Manual entry fallback
-            Container(
+            LiquidGlassCard(
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppTheme.mintGreen,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.lightGreen),
-              ),
+              borderRadius: BorderRadius.circular(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -299,15 +296,12 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
     required String title,
     required String subtitle,
   }) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
+      child: LiquidGlassCard(
+        padding: const EdgeInsets.all(14),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Row(
+        child: Row(
         children: [
           Icon(icon, color: color, size: 26),
           const SizedBox(width: 12),
@@ -335,6 +329,7 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

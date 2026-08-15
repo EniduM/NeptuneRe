@@ -8,6 +8,7 @@ import '../../models/api_models.dart';
 import '../../providers/app_state.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/async_states.dart';
+import '../../widgets/liquid_glass.dart';
 import '../../widgets/request_card.dart';
 import 'rider_request_workflow_screen.dart';
 
@@ -81,8 +82,10 @@ class _RiderJobsScreenState extends State<RiderJobsScreen> {
               itemCount: requests.length + (active.isEmpty ? 0 : 1),
               itemBuilder: (context, index) {
                 if (active.isNotEmpty && index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                  return LiquidGlassCard(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(14),
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(

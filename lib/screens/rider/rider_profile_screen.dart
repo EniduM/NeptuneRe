@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../providers/app_state.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/hexagon_clipper.dart';
+import '../../widgets/liquid_glass.dart';
 
 /// Rider profile: identity from /auth/me, workflow help and logout.
 class RiderProfileScreen extends StatelessWidget {
@@ -72,20 +73,9 @@ class RiderProfileScreen extends StatelessWidget {
         child: Column(
           children: [
             // Identity card
-            Container(
+            LiquidGlassCard(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppTheme.pureWhite,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+              borderRadius: BorderRadius.circular(24),
               child: Column(
                 children: [
                   SizedBox(
@@ -99,7 +89,7 @@ class RiderProfileScreen extends StatelessWidget {
                             color: AppTheme.primaryGreen,
                             child: Center(
                               child: Text(
-                                user!.loginId.isNotEmpty
+                                user.loginId.isNotEmpty
                                     ? user.loginId[0].toUpperCase()
                                     : 'R',
                                 style: GoogleFonts.outfit(
@@ -154,13 +144,9 @@ class RiderProfileScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Collection workflow help
-            Container(
+            LiquidGlassCard(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.mintGreen,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: AppTheme.lightGreen),
-              ),
+              borderRadius: BorderRadius.circular(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -200,12 +186,8 @@ class RiderProfileScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Account card
-            Container(
-              decoration: BoxDecoration(
-                color: AppTheme.pureWhite,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-              ),
+            LiquidGlassCard(
+              borderRadius: BorderRadius.circular(20),
               child: Column(
                 children: [
                   ListTile(

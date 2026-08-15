@@ -41,8 +41,9 @@ class StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: bg,
+        color: bg.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: fg.withValues(alpha: 0.24)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

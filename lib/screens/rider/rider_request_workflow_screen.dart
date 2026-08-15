@@ -9,6 +9,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/hexagon_clipper.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/async_states.dart';
+import '../../widgets/liquid_glass.dart';
 import '../../widgets/request_map_view.dart';
 import '../../widgets/status_chip.dart';
 import 'rider_qr_scan_screen.dart';
@@ -213,13 +214,9 @@ class _RiderRequestWorkflowScreenState
 
   Widget _buildCollectorCard(CollectionRequest request) {
     final collector = request.collector;
-    return Container(
+    return LiquidGlassCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppTheme.pureWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
+      borderRadius: BorderRadius.circular(16),
       child: Row(
         children: [
           SizedBox(
@@ -314,16 +311,10 @@ class _RiderRequestWorkflowScreenState
     required bool done,
     Widget? trailing,
   }) {
-    return Container(
+    return LiquidGlassCard(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: done ? AppTheme.mintGreen : AppTheme.pureWhite,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: done ? AppTheme.lightGreen : const Color(0xFFE5E7EB),
-          width: done ? 1.5 : 1,
-        ),
-      ),
+      borderRadius: BorderRadius.circular(14),
+      fillOpacity: done ? 0.68 : 0.58,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

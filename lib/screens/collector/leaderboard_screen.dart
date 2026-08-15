@@ -8,6 +8,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/hexagon_clipper.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/async_states.dart';
+import '../../widgets/liquid_glass.dart';
 
 /// Full collector leaderboard (GET /collector/leaderboard) with an
 /// all-time / this-month toggle.
@@ -44,14 +45,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       body: Column(
         children: [
           // Period toggle
-          Container(
+          LiquidGlassCard(
             margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
-            ),
+            borderRadius: BorderRadius.circular(16),
             child: Row(
               children: [
                 _periodButton('This Month', true),
@@ -61,68 +58,72 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           ),
 
           // Banner Header
-          Container(
+          LiquidGlassCard(
             margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppTheme.primaryGreen, AppTheme.lightGreen],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: AppTheme.primaryGreen.withValues(alpha: 0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+            padding: EdgeInsets.zero,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppTheme.primaryGreen, AppTheme.lightGreen],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 54,
-                  height: 54,
-                  child: ClipPath(
-                    clipper: HexagonClipper(),
-                    child: Container(
-                      color: AppTheme.pureWhite,
-                      child: const Center(
-                        child: Icon(
-                          Icons.emoji_events_rounded,
-                          color: AppTheme.gold,
-                          size: 32,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryGreen.withValues(alpha: 0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 54,
+                    height: 54,
+                    child: ClipPath(
+                      clipper: HexagonClipper(),
+                      child: Container(
+                        color: AppTheme.pureWhite,
+                        child: const Center(
+                          child: Icon(
+                            Icons.emoji_events_rounded,
+                            color: AppTheme.gold,
+                            size: 32,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Waste Collection Champions',
-                        style: GoogleFonts.outfit(
-                          color: AppTheme.pureWhite,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Waste Collection Champions',
+                          style: GoogleFonts.outfit(
+                            color: AppTheme.pureWhite,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Ranked by total weight collected (kg)',
-                        style: GoogleFonts.outfit(
-                          color: AppTheme.pureWhite.withValues(alpha: 0.9),
-                          fontSize: 13,
+                        const SizedBox(height: 2),
+                        Text(
+                          'Ranked by total weight collected (kg)',
+                          style: GoogleFonts.outfit(
+                            color: AppTheme.pureWhite.withValues(alpha: 0.9),
+                            fontSize: 13,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -200,28 +201,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       _ => (AppTheme.lightGreen, null),
     };
 
-    return Container(
+    return LiquidGlassCard(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.pureWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: entry.rank <= 3
-              ? rankBadgeColor.withValues(alpha: 0.6)
-              : const Color(0xFFE5E7EB),
-          width: entry.rank <= 3 ? 1.5 : 1,
-        ),
-        boxShadow: entry.rank <= 3
-            ? [
-                BoxShadow(
-                  color: rankBadgeColor.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : [],
-      ),
+      borderRadius: BorderRadius.circular(16),
+      fillOpacity: entry.rank <= 3 ? 0.66 : 0.58,
       child: Row(
         children: [
           SizedBox(

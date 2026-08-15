@@ -9,6 +9,7 @@ import '../../theme/app_theme.dart';
 import '../../theme/hexagon_clipper.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/async_states.dart';
+import '../../widgets/liquid_glass.dart';
 import 'create_request_screen.dart';
 import 'leaderboard_screen.dart';
 
@@ -84,24 +85,20 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             // Greeting header
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppTheme.primaryGreen, AppTheme.lightGreen],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primaryGreen.withValues(alpha: 0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+            LiquidGlassCard(
+              padding: EdgeInsets.zero,
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppTheme.primaryGreen, AppTheme.lightGreen],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                ],
-              ),
-              child: Row(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
                 children: [
                   SizedBox(
                     width: 54,
@@ -148,6 +145,7 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
                     ),
                   ),
                 ],
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -167,13 +165,9 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
               loadingMessage: 'Checking assignment…',
               builder: (context, assignment) {
                 if (assignment == null) {
-                  return Container(
+                  return LiquidGlassCard(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppTheme.cardBg,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE5E7EB)),
-                    ),
+                    borderRadius: BorderRadius.circular(16),
                     child: Row(
                       children: [
                         const Icon(
@@ -196,13 +190,9 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
                     ),
                   );
                 }
-                return Container(
+                return LiquidGlassCard(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.pureWhite,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.lightGreen, width: 1.5),
-                  ),
+                  borderRadius: BorderRadius.circular(16),
                   child: Row(
                     children: [
                       SizedBox(
@@ -400,14 +390,10 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
       _ => (AppTheme.lightGreen, null),
     };
 
-    return Container(
+    return LiquidGlassCard(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppTheme.pureWhite,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
+      borderRadius: BorderRadius.circular(14),
       child: Row(
         children: [
           SizedBox(
@@ -466,14 +452,10 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
   }
 
   Widget _buildMiniRequestTile(CollectionRequest request) {
-    return Container(
+    return LiquidGlassCard(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.pureWhite,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
+      borderRadius: BorderRadius.circular(14),
       child: Row(
         children: [
           const Icon(Icons.location_on_rounded,

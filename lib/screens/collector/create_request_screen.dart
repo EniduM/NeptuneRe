@@ -7,6 +7,7 @@ import '../../services/api_client.dart';
 import '../../services/location_service.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/hexagon_clipper.dart';
+import '../../widgets/liquid_glass.dart';
 
 /// Collector creates a collection request using the current GPS location.
 class CreateRequestScreen extends StatefulWidget {
@@ -106,8 +107,11 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
+            LiquidGlassCard(
+              padding: EdgeInsets.zero,
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [AppTheme.primaryGreen, AppTheme.lightGreen],
@@ -148,6 +152,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                   ),
                 ],
               ),
+              ),
             ),
             const SizedBox(height: 20),
 
@@ -172,18 +177,9 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
             const SizedBox(height: 16),
 
             // Location preview
-            Container(
+            LiquidGlassCard(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.pureWhite,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: _latitude != null
-                      ? AppTheme.lightGreen
-                      : const Color(0xFFE5E7EB),
-                  width: _latitude != null ? 1.5 : 1,
-                ),
-              ),
+              borderRadius: BorderRadius.circular(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

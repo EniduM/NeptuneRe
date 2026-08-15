@@ -8,6 +8,7 @@ import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/hexagon_clipper.dart';
 import '../../widgets/async_states.dart';
+import '../../widgets/liquid_glass.dart';
 
 /// Rider: enter the TOTAL weight (kg) of the collected waste, select the
 /// vehicle, and complete the collection (POST .../complete).
@@ -148,13 +149,9 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Collector summary
-            Container(
+            LiquidGlassCard(
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: AppTheme.pureWhite,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-              ),
+              borderRadius: BorderRadius.circular(16),
               child: Row(
                 children: [
                   SizedBox(
@@ -353,13 +350,9 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
       builder: (context, vehicles) {
         final active = vehicles.where((v) => v.isActive).toList();
         if (active.isEmpty) {
-          return Container(
+          return LiquidGlassCard(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFEF3C7),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFF59E0B)),
-            ),
+            borderRadius: BorderRadius.circular(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
