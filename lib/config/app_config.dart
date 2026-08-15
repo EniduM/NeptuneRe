@@ -1,23 +1,32 @@
 /// Application configuration.
 ///
-/// The backend base URL is resolved at build time via:
-///   flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000
+/// The backend is currently running on the development PC.
+/// The physical phone and the backend PC must be connected
+/// to the same Wi-Fi/network.
 ///
-/// When no override is provided, the temporary Cloudflare tunnel to the
-/// Neptune backend is used:
-/// - https://chef-dried-lawyers-committees.trycloudflare.com
-///   (temporary — ask the backend owner for a new link when it expires)
+/// Backend:
+///   http://192.168.1.2:3000
+///
+/// You can override this at build time with:
+///   flutter run --dart-define=API_BASE_URL=http://192.168.1.2:3000
 class AppConfig {
+  /// Optional build-time API URL override.
+  ///
+  /// Example:
+  /// flutter run --dart-define=API_BASE_URL=http://192.168.1.2:3000
   static const String _definedBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
   );
 
+  /// Neptune backend base URL.
   static String get apiBaseUrl {
-    if (_definedBaseUrl.isNotEmpty) return _definedBaseUrl;
-    return 'https://chef-dried-lawyers-committees.trycloudflare.com';
+    if (_definedBaseUrl.isNotEmpty) {
+      return _definedBaseUrl;
+    }
+
+    return 'http://192.168.1.2:3000';
   }
 
-  /// Access token TTL is 15 minutes server-side; refresh the session by
-  /// logging in again when a 401 is received.
+  /// Access token validity on the backend.
   static const Duration tokenValidity = Duration(minutes: 15);
 }

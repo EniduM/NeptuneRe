@@ -86,17 +86,33 @@ class ApiClient {
   }
 
   Future<dynamic> post(
-    String path, {
-    Object? body,
-    bool authenticated = true,
-  }) async {
+      String path, {
+        Object? body,
+        bool authenticated = true,
+      }) async {
+    final uri = _uri(path);
+    final headers = await _headers(authenticated: authenticated);
+
+    print('========== API POST ==========');
+    print('URL: $uri');
+    print('Authenticated: $authenticated');
+    print('Body: $body');
+    print('Headers: ${headers.keys}');
+    print('==============================');
+
     final response = await _send(
-      () async => http.post(
-        _uri(path),
-        headers: await _headers(authenticated: authenticated),
+          () async => http.post(
+        uri,
+        headers: headers,
         body: body == null ? null : jsonEncode(body),
       ),
     );
+
+    print('========== API RESPONSE ======');
+    print('Status: ${response.statusCode}');
+    print('Body: ${response.body}');
+    print('==============================');
+
     return _decode(response);
   }
 
