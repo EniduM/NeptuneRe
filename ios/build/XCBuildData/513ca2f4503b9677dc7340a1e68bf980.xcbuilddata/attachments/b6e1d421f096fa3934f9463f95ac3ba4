@@ -1,0 +1,4 @@
+module package_info_plus {
+umbrella "/Users/eniduoushanamaluddeniya/Downloads/NeptuneRe/ios/Flutter/ephemeral/Packages/.packages/package_info_plus-10.2.1/Sources/package_info_plus/include"
+export *
+}

@@ -1,0 +1,4 @@
+module mobile_scanner {
+header "mobile_scanner-Swift.h"
+export *
+}
