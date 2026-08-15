@@ -24,7 +24,7 @@ class AppConfig {
       return _definedBaseUrl;
     }
 
-    return 'http://192.168.1.2:3000';
+    return 'https://subscription-organic-quilt-roger.trycloudflare.com';
   }
 
   /// Access token validity on the backend.
