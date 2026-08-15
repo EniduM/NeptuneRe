@@ -24,7 +24,7 @@ class AppConfig {
       return _definedBaseUrl;
     }
 
-    return 'https://subscription-organic-quilt-roger.trycloudflare.com';
+    return 'https://neptune-backend-xppn-6kizr9yth-sahan721s-projects.vercel.app';
   }
 
   /// Access token validity on the backend.
