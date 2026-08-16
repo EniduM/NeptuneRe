@@ -9,14 +9,13 @@ import '../widgets/neptune_logo_footer.dart';
 import 'collector/collector_dashboard_screen.dart';
 import 'collector/collector_profile_screen.dart';
 import 'collector/collector_requests_screen.dart';
-import 'collector/leaderboard_screen.dart';
 import 'rider/rider_dashboard_screen.dart';
 import 'rider/rider_jobs_screen.dart';
 import 'rider/rider_profile_screen.dart';
 
 /// Role-based navigation shell.
 ///
-/// COLLECTOR: Dashboard · Requests · Leaderboard · Profile
+/// COLLECTOR: Dashboard · Requests · Profile
 /// RIDER:     Available · My Jobs · Profile
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -81,13 +80,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final pages = <Widget>[
       const CollectorDashboardScreen(),
       const CollectorRequestsScreen(),
-      const LeaderboardScreen(),
       const CollectorProfileScreen(),
     ];
     final items = [
       ('Home', Icons.home_rounded),
       ('My Requests', Icons.list_alt_rounded),
-      ('Leaderboard', Icons.leaderboard_rounded),
       ('Profile', Icons.person_rounded),
     ];
 

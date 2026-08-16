@@ -187,8 +187,8 @@ class CollectorProfileScreen extends StatelessWidget {
                   // that returns this collector's qrToken (it is managed via
                   // ADMIN APIs). When a collector API exposes `qrToken`,
                   // render QrImageView(data: qrToken) here — the QR value the
-                  // Rider scans is exactly this token, verified server-side
-                  // by POST /rider/collection-requests/:id/verify-qr.
+                  // Rider scans is exactly this token, verified by the
+                  // PENDING BACKEND stub RiderApi.verifyQrToken.
                   Container(
                     width: 200,
                     height: 200,

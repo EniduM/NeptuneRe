@@ -46,14 +46,17 @@ class _RiderRequestWorkflowScreenState
         ),
       ),
     );
-    if (verified == true && mounted) {
+    if (!mounted) return;
+    if (verified == true) {
       setState(() => _qrVerified = true);
-      setState(() => _reloadTick++);
     }
+    // Refresh regardless: the request may have changed server-side while
+    // the scanner was open (e.g. cancelled by the Collector).
+    setState(() => _reloadTick++);
   }
 
   Future<void> _openWeightEntry(CollectionRequest request) async {
-    final completed = await Navigator.push<bool>(
+    await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (_) => RiderWeightEntryScreen(
@@ -62,9 +65,10 @@ class _RiderRequestWorkflowScreenState
         ),
       ),
     );
-    if (completed == true && mounted) {
-      setState(() => _reloadTick++);
-    }
+    if (!mounted) return;
+    // Refresh regardless so state reflects the server (e.g. the request
+    // was cancelled while the weight screen was open).
+    setState(() => _reloadTick++);
   }
 
   @override

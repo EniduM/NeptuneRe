@@ -178,31 +178,6 @@ class CollectionRequest {
   }
 }
 
-class LeaderboardEntry {
-  final String collectorId;
-  final String fullName;
-  final double totalWeightKg;
-  final int totalCollections;
-  final int rank;
-
-  const LeaderboardEntry({
-    required this.collectorId,
-    required this.fullName,
-    required this.totalWeightKg,
-    required this.totalCollections,
-    required this.rank,
-  });
-
-  factory LeaderboardEntry.fromJson(Map<String, dynamic> json) =>
-      LeaderboardEntry(
-        collectorId: json['collectorId'] as String,
-        fullName: (json['fullName'] as String?) ?? '',
-        totalWeightKg: ((json['totalWeightKg'] as num?) ?? 0).toDouble(),
-        totalCollections: ((json['totalCollections'] as num?) ?? 0).toInt(),
-        rank: ((json['rank'] as num?) ?? 0).toInt(),
-      );
-}
-
 class Vehicle {
   final String id;
   final String vehicleCode;

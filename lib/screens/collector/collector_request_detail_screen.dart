@@ -31,10 +31,8 @@ class _CollectorRequestDetailScreenState
   Timer? _poller;
   int _reloadTick = 0;
 
-  Future<CollectionRequest> _load() async {
-    final all = await context.read<AppState>().api.collector.myRequests();
-    return all.firstWhere((r) => r.id == widget.requestId);
-  }
+  Future<CollectionRequest> _load() =>
+      context.read<AppState>().api.collector.getRequest(widget.requestId);
 
   @override
   void initState() {

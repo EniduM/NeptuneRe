@@ -65,7 +65,12 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-      setState(() => _isAccepting = false);
+      // 409 (already accepted by another Rider) and other failures:
+      // refresh from the server instead of trusting any local state.
+      setState(() {
+        _isAccepting = false;
+        _reloadTick++;
+      });
       return;
     } finally {
       if (mounted) setState(() => _isAccepting = false);

@@ -39,6 +39,11 @@ class ApiClient {
 
   static ApiClient? _instance;
 
+  /// Invoked whenever an authenticated request returns 401 (JWT expired —
+  /// tokens are valid for 15 minutes). AppState wires this to clear the
+  /// session and return to the login screen.
+  static void Function()? onUnauthorized;
+
   /// Shared instance bound to the configured base URL.
   static ApiClient get instance {
     if (_instance == null) {
@@ -82,7 +87,7 @@ class ApiClient {
         headers: await _headers(authenticated: authenticated),
       ),
     );
-    return _decode(response);
+    return _decode(response, authenticated: authenticated);
   }
 
   Future<dynamic> post(
@@ -93,27 +98,15 @@ class ApiClient {
     final uri = _uri(path);
     final headers = await _headers(authenticated: authenticated);
 
-    print('========== API POST ==========');
-    print('URL: $uri');
-    print('Authenticated: $authenticated');
-    print('Body: $body');
-    print('Headers: ${headers.keys}');
-    print('==============================');
-
     final response = await _send(
-          () async => http.post(
+      () async => http.post(
         uri,
         headers: headers,
         body: body == null ? null : jsonEncode(body),
       ),
     );
 
-    print('========== API RESPONSE ======');
-    print('Status: ${response.statusCode}');
-    print('Body: ${response.body}');
-    print('==============================');
-
-    return _decode(response);
+    return _decode(response, authenticated: authenticated);
   }
 
   Future<dynamic> patch(
@@ -128,7 +121,7 @@ class ApiClient {
         body: body == null ? null : jsonEncode(body),
       ),
     );
-    return _decode(response);
+    return _decode(response, authenticated: authenticated);
   }
 
   Future<http.Response> _send(
@@ -191,7 +184,7 @@ class ApiClient {
     return error.toString();
   }
 
-  dynamic _decode(http.Response response) {
+  dynamic _decode(http.Response response, {bool authenticated = false}) {
     final status = response.statusCode;
     final body = (response.body.isEmpty ||
             response.headers['content-type']?.contains('json') == false)
@@ -200,6 +193,10 @@ class ApiClient {
 
     if (status >= 200 && status < 300) {
       return body;
+    }
+
+    if (status == 401 && authenticated) {
+      onUnauthorized?.call();
     }
 
     throw ApiException(

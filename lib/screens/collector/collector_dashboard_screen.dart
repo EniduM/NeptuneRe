@@ -11,10 +11,9 @@ import '../../utils/formatters.dart';
 import '../../widgets/async_states.dart';
 import '../../widgets/liquid_glass.dart';
 import 'create_request_screen.dart';
-import 'leaderboard_screen.dart';
 
-/// Collector dashboard: today's assignment, quick create CTA,
-/// recent request summary and a clearly visible leaderboard section.
+/// Collector dashboard: today's assignment, quick create CTA and a
+/// recent request summary.
 class CollectorDashboardScreen extends StatefulWidget {
   const CollectorDashboardScreen({super.key});
 
@@ -26,6 +25,11 @@ class CollectorDashboardScreen extends StatefulWidget {
 class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
   int _reloadTick = 0;
   String? _assignmentError;
+
+  /// The request returned by the 201 response from the create screen. Kept
+  /// locally so the PENDING status from the POST response shows immediately
+  /// instead of waiting for the next server refresh.
+  CollectionRequest? _justCreated;
 
   Future<DailyAssignment?> _loadAssignment() async {
     try {
@@ -47,12 +51,14 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
     }
   }
 
-  Future<List<LeaderboardEntry>> _loadLeaderboard() =>
-      context.read<AppState>().api.collector.leaderboard(period: 'month');
-
   Future<List<CollectionRequest>> _loadRecent() async {
     final all = await context.read<AppState>().api.collector.myRequests();
-    return all.take(3).toList();
+    final recent = all.take(3).toList();
+    final created = _justCreated;
+    if (created != null && !recent.any((r) => r.id == created.id)) {
+      recent.insert(0, created);
+    }
+    return recent;
   }
 
   void _refreshAll() {
@@ -248,12 +254,15 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
               height: 52,
               child: ElevatedButton.icon(
                 onPressed: () async {
-                  await Navigator.push(
+                  final created = await Navigator.push<CollectionRequest>(
                     context,
                     MaterialPageRoute(
                       builder: (_) => const CreateRequestScreen(),
                     ),
                   );
+                  if (created != null) {
+                    setState(() => _justCreated = created);
+                  }
                   _refreshAll();
                 },
                 icon: const Icon(Icons.add_location_alt_rounded),
@@ -262,72 +271,6 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
                   style: GoogleFonts.outfit(fontWeight: FontWeight.w800),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-
-            // Leaderboard section (top performers this month)
-            Row(
-              children: [
-                const Icon(Icons.leaderboard_rounded,
-                    color: AppTheme.primaryGreen, size: 22),
-                const SizedBox(width: 8),
-                Text(
-                  'Leaderboard',
-                  style: GoogleFonts.outfit(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.darkBlack,
-                  ),
-                ),
-                const Spacer(),
-                TextButton(
-                  onPressed: _openFullLeaderboard,
-                  child: Text(
-                    'View All',
-                    style: GoogleFonts.outfit(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryGreen,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            AsyncView<List<LeaderboardEntry>>(
-              key: ValueKey('lb$_reloadTick'),
-              future: _loadLeaderboard,
-              loadingMessage: 'Loading leaderboard…',
-              builder: (context, entries) {
-                if (entries.isEmpty) {
-                  return const EmptyView(
-                    icon: Icons.emoji_events_outlined,
-                    title: 'No collections yet',
-                    subtitle: 'Leaderboard updates once collections are completed.',
-                  );
-                }
-                return Column(
-                  children: [
-                    for (final entry in entries.take(5))
-                      _buildLeaderboardTile(entry),
-                    if (entries.length > 5)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: TextButton(
-                          onPressed: _openFullLeaderboard,
-                          child: Text(
-                            'Show all ${entries.length} collectors',
-                            style: GoogleFonts.outfit(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.primaryGreen,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
             ),
             const SizedBox(height: 24),
 
@@ -371,82 +314,6 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
             const SizedBox(height: 16),
           ],
         ),
-      ),
-    );
-  }
-
-  void _openFullLeaderboard() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const LeaderboardScreen()),
-    );
-  }
-
-  Widget _buildLeaderboardTile(LeaderboardEntry entry) {
-    final (badgeColor, icon) = switch (entry.rank) {
-      1 => (AppTheme.gold, Icons.military_tech_rounded),
-      2 => (AppTheme.silver, Icons.military_tech_rounded),
-      3 => (AppTheme.bronze, Icons.military_tech_rounded),
-      _ => (AppTheme.lightGreen, null),
-    };
-
-    return LiquidGlassCard(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(10),
-      borderRadius: BorderRadius.circular(14),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 36,
-            height: 36,
-            child: ClipPath(
-              clipper: HexagonClipper(),
-              child: Container(
-                color: badgeColor,
-                child: Center(
-                  child: icon != null
-                      ? Icon(icon, color: AppTheme.pureWhite, size: 18)
-                      : Text(
-                          '#${entry.rank}',
-                          style: GoogleFonts.outfit(
-                            color: AppTheme.pureWhite,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              entry.fullName,
-              style: GoogleFonts.outfit(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-                color: AppTheme.darkBlack,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Text(
-            '${formatWeight(entry.totalWeightKg)} kg',
-            style: GoogleFonts.outfit(
-              fontWeight: FontWeight.w900,
-              fontSize: 14,
-              color: AppTheme.primaryGreen,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            '${entry.totalCollections} jobs',
-            style: GoogleFonts.outfit(
-              fontSize: 11,
-              color: AppTheme.textMuted,
-            ),
-          ),
-        ],
       ),
     );
   }

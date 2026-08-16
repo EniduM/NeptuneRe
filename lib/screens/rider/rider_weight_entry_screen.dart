@@ -7,6 +7,7 @@ import '../../providers/app_state.dart';
 import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/hexagon_clipper.dart';
+import '../../utils/formatters.dart';
 import '../../widgets/async_states.dart';
 import '../../widgets/liquid_glass.dart';
 
@@ -34,6 +35,7 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
   Vehicle? _selectedVehicle;
   bool _isSubmitting = false;
   bool _completed = false;
+  CompleteCollectionResponse? _result;
 
   Future<List<Vehicle>> _loadVehicles() =>
       context.read<AppState>().api.rider.vehicles();
@@ -61,13 +63,16 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
     setState(() => _isSubmitting = true);
     try {
       final weight = double.parse(_weightController.text.trim());
-      await context.read<AppState>().api.rider.complete(
+      final completed = await context.read<AppState>().api.rider.complete(
             requestId: widget.request.id,
             vehicleId: _selectedVehicle!.id,
             weightKg: weight,
           );
       if (!mounted) return;
-      setState(() => _completed = true);
+      setState(() {
+        _result = completed;
+        _completed = true;
+      });
     } on ApiException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -119,12 +124,47 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'The collection record has been saved.',
+                  'The request and collection record are saved.',
                   style: GoogleFonts.outfit(
                     fontSize: 13,
                     color: AppTheme.textMuted,
                   ),
                 ),
+                const SizedBox(height: 20),
+                if (_result != null)
+                  LiquidGlassCard(
+                    padding: const EdgeInsets.all(16),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Column(
+                      children: [
+                        _successRow(
+                          Icons.monitor_weight_rounded,
+                          'Total weight',
+                          '${formatWeight(_result!.collection.weightKg)} kg',
+                        ),
+                        const SizedBox(height: 10),
+                        _successRow(
+                          Icons.local_shipping_rounded,
+                          'Vehicle',
+                          _result!.collection.vehicle == null
+                              ? '—'
+                              : '${_result!.collection.vehicle!.vehicleCode} (${_result!.collection.vehicle!.vehicleType})',
+                        ),
+                        const SizedBox(height: 10),
+                        _successRow(
+                          Icons.receipt_long_rounded,
+                          'Collection ID',
+                          _result!.collection.id.substring(0, 8).toUpperCase(),
+                        ),
+                        const SizedBox(height: 10),
+                        _successRow(
+                          Icons.check_circle_rounded,
+                          'Request status',
+                          '${statusLabel(_result!.request.status)} • ${formatDateTime(_result!.request.completedAt)}',
+                        ),
+                      ],
+                    ),
+                  ),
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
@@ -338,11 +378,11 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
     );
   }
 
-  /// Vehicle picker backed by GET /rider/vehicles.
-  ///
-  /// NOTE: this endpoint does not exist in the backend yet (see RiderApi.vehicles).
-  /// Until the backend team adds it, this section reports the API gap instead
-  /// of fabricating a vehicle list; completing a collection requires the list.
+  /// Vehicle picker backed by GET /admin/vehicles (see RiderApi.vehicles):
+  /// the Rider selects an ACTIVE vehicle at completion time and passes its
+  /// vehicleId in the complete call. The current backend guards the admin
+  /// vehicle list with the ADMIN role, so a 403 surfaces here until the
+  /// backend team opens it to RIDER.
   Widget _buildVehiclePicker() {
     return AsyncView<List<Vehicle>>(
       future: _loadVehicles,
@@ -405,6 +445,36 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
           onChanged: (v) => setState(() => _selectedVehicle = v),
         );
       },
+    );
+  }
+
+  Widget _successRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppTheme.primaryGreen),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: GoogleFonts.outfit(
+              fontSize: 12.5,
+              color: AppTheme.textMuted,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: GoogleFonts.outfit(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.darkBlack,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

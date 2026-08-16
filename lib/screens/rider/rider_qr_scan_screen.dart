@@ -9,8 +9,9 @@ import '../../services/api_client.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/liquid_glass.dart';
 
-/// Rider: scan the Collector's permanent QR and verify it server-side via
-/// POST /rider/collection-requests/:id/verify-qr.
+/// Rider: scan the Collector's permanent QR and verify it via
+/// RiderApi.verifyQrToken — a PENDING BACKEND stub (there is no backend
+/// verification endpoint yet); it returns success so the flow continues.
 ///
 /// Pops `true` when verification succeeds (returns to the workflow hub).
 class RiderQrScanScreen extends StatefulWidget {
@@ -65,7 +66,7 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
           .read<AppState>()
           .api
           .rider
-          .verifyQr(requestId: widget.request.id, qrToken: trimmed);
+          .verifyQrToken(requestId: widget.request.id, qrToken: trimmed);
       if (!mounted) return;
       setState(() => _verified = true);
       ScaffoldMessenger.of(context).showSnackBar(

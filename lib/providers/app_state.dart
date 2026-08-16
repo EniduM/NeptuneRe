@@ -25,6 +25,7 @@ class AppState extends ChangeNotifier {
     required this.api,
     required TokenStorage tokenStorage,
   })  : _tokenStorage = tokenStorage {
+    ApiClient.onUnauthorized = _handleSessionExpired;
     _restoreSession();
   }
 
@@ -97,6 +98,17 @@ class AppState extends ChangeNotifier {
     _currentUser = null;
     _isDemoSession = false;
     await _tokenStorage.clearSession();
+    notifyListeners();
+  }
+
+  /// Called by [ApiClient] on any authenticated 401. JWT tokens expire after
+  /// 15 minutes, so this WILL happen mid-session: clear the session and
+  /// return to the login screen instead of leaving screens in a broken state.
+  void _handleSessionExpired() {
+    if (_isDemoSession) return;
+    _accessToken = null;
+    _currentUser = null;
+    _tokenStorage.clearSession();
     notifyListeners();
   }
 }

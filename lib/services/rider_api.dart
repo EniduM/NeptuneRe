@@ -33,15 +33,19 @@ class RiderApi {
     return CollectionRequest.fromJson(json as Map<String, dynamic>);
   }
 
-  /// POST /rider/collection-requests/:id/verify-qr
-  Future<void> verifyQr({
+  /// Verify the Collector's permanent QR before completing a collection.
+  ///
+  // PENDING BACKEND: there is no backend verification endpoint for this step
+  // (NEPTUNE_API_HANDOVER.md does not define one, and the NestJS backend has
+  // no /verify-qr route). This stub currently returns success so the flow can
+  // continue; replace the body with the real call once the backend team
+  // exposes an endpoint.
+  Future<void> verifyQrToken({
     required String requestId,
     required String qrToken,
   }) async {
-    await _client.post(
-      '/rider/collection-requests/$requestId/verify-qr',
-      body: {'qrToken': qrToken},
-    );
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    return;
   }
 
   /// POST /rider/collection-requests/:id/complete
@@ -60,15 +64,20 @@ class RiderApi {
   }
 
   // ---------------------------------------------------------------------
-  // NOT in NEPTUNE_API_HANDOVER.md: the backend currently exposes vehicle
-  // management only to ADMIN. The Rider completion payload requires a
-  // vehicleId, so a rider-facing vehicle list endpoint is required.
-  // Wire-up target: GET /rider/vehicles (returns ACTIVE vehicles).
-  // Until the backend team adds it, callers receive an ApiException and the
-  // UI shows an "API unavailable" state instead of fabricated data.
+  // Vehicle picker for the completion step.
+  //
+  // Per NEPTUNE_API_HANDOVER.md the completion payload requires a vehicleId
+  // and there is no rider-specific vehicle API: the Rider selects an ACTIVE
+  // vehicle from the admin vehicle list (GET /admin/vehicles) at completion
+  // time and passes vehicleId in the complete call. Active vehicles are
+  // filtered client-side via Vehicle.isActive.
+  //
+  // NOTE: the current NestJS backend guards /admin/vehicles with the ADMIN
+  // role (riders receive 403). Until the backend team opens vehicle listing
+  // to RIDER, the picker surfaces that error instead of fabricated data.
   // ---------------------------------------------------------------------
   Future<List<Vehicle>> vehicles() async {
-    final json = await _client.get('/rider/vehicles');
+    final json = await _client.get('/admin/vehicles');
     return (json as List)
         .map((e) => Vehicle.fromJson(e as Map<String, dynamic>))
         .toList();

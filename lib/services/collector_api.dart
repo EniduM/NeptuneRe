@@ -33,15 +33,10 @@ class CollectorApi {
         .toList();
   }
 
-  /// GET /collector/leaderboard?period=month
-  Future<List<LeaderboardEntry>> leaderboard({String? period}) async {
-    final json = await _client.get(
-      '/collector/leaderboard',
-      query: period == null ? null : {'period': period},
-    );
-    return (json as List)
-        .map((e) => LeaderboardEntry.fromJson(e as Map<String, dynamic>))
-        .toList();
+  /// GET /collector/collection-requests/:id
+  Future<CollectionRequest> getRequest(String id) async {
+    final json = await _client.get('/collector/collection-requests/$id');
+    return CollectionRequest.fromJson(json as Map<String, dynamic>);
   }
 
   /// PATCH /collector/collection-requests/:id/cancel
