@@ -24,7 +24,7 @@ class AppConfig {
       return _definedBaseUrl;
     }
 
-    return 'https://neptune-backend-xppn-6kizr9yth-sahan721s-projects.vercel.app';
+    return 'https://neptune-backend-kappa.vercel.app';
   }
 
   /// Access token validity on the backend.
