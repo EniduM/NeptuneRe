@@ -10,6 +10,7 @@ import '../../theme/hexagon_clipper.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/async_states.dart';
 import '../../widgets/liquid_glass.dart';
+import 'collector_request_detail_screen.dart';
 import 'create_request_screen.dart';
 
 /// Collector dashboard: today's assignment, quick create CTA and a
@@ -59,6 +60,15 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
       recent.insert(0, created);
     }
     return recent;
+  }
+
+  Future<List<CollectionRequest>> _loadAllRequests() async {
+    final all = await context.read<AppState>().api.collector.myRequests();
+    final created = _justCreated;
+    if (created != null && !all.any((r) => r.id == created.id)) {
+      return [created, ...all];
+    }
+    return all;
   }
 
   void _refreshAll() {
@@ -155,6 +165,96 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
               ),
             ),
             const SizedBox(height: 16),
+
+            Text(
+              'Request Overview',
+              style: GoogleFonts.outfit(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.darkBlack,
+              ),
+            ),
+            const SizedBox(height: 8),
+            AsyncView<List<CollectionRequest>>(
+              key: ValueKey('counts$_reloadTick'),
+              future: _loadAllRequests,
+              loadingMessage: 'Loading request counts…',
+              builder: (context, requests) {
+                final total = requests.length;
+                final pending = requests
+                    .where((r) => r.status == RequestStatus.pending)
+                    .length;
+                final completed = requests
+                    .where((r) => r.status == RequestStatus.completed)
+                    .length;
+                final accepted = requests
+                    .where((r) => r.status == RequestStatus.accepted)
+                    .length;
+                final cancelled = requests
+                    .where((r) => r.status == RequestStatus.cancelled)
+                    .length;
+                return Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _countCard(
+                            'Requests',
+                            total,
+                            Icons.list_alt_rounded,
+                            AppTheme.primaryGreen,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _countCard(
+                            'Pending',
+                            pending,
+                            Icons.hourglass_top_rounded,
+                            const Color(0xFFEF6C00),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _countCard(
+                            'Completed',
+                            completed,
+                            Icons.check_circle_rounded,
+                            AppTheme.primaryGreen,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    LiquidGlassCard(
+                      padding: const EdgeInsets.all(12),
+                      borderRadius: BorderRadius.circular(14),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.pie_chart_rounded,
+                            size: 17,
+                            color: AppTheme.primaryGreen,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Current status: Pending $pending • Accepted $accepted • Completed $completed • Cancelled $cancelled',
+                              style: GoogleFonts.outfit(
+                                fontSize: 12,
+                                color: AppTheme.textMuted,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 18),
 
             // Today's Assignment card
             Text(
@@ -262,6 +362,14 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
                   );
                   if (created != null) {
                     setState(() => _justCreated = created);
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CollectorRequestDetailScreen(
+                          requestId: created.id,
+                        ),
+                      ),
+                    );
                   }
                   _refreshAll();
                 },
@@ -314,6 +422,37 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
             const SizedBox(height: 16),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _countCard(String label, int value, IconData icon, Color color) {
+    return LiquidGlassCard(
+      padding: const EdgeInsets.all(12),
+      borderRadius: BorderRadius.circular(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 17, color: color),
+          const SizedBox(height: 8),
+          Text(
+            '$value',
+            style: GoogleFonts.outfit(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: AppTheme.darkBlack,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: GoogleFonts.outfit(
+              fontSize: 11,
+              color: AppTheme.textMuted,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -5,8 +5,8 @@ import '../providers/app_state.dart';
 import '../theme/app_theme.dart';
 import '../theme/hexagon_clipper.dart';
 import '../widgets/liquid_glass.dart';
-import 'login_screen.dart';
 import 'main_navigation_screen.dart';
+import 'role_landing_screen.dart';
 
 /// Startup gate: restores the persisted JWT session before deciding
 /// between Login and the role-based main navigation.
@@ -71,7 +71,7 @@ class SplashScreen extends StatelessWidget {
     }
 
     if (!appState.isAuthenticated && !appState.isDemoSession) {
-      return const LoginScreen();
+      return const RoleLandingScreen();
     }
 
     return const MainNavigationScreen();

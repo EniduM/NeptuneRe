@@ -12,6 +12,7 @@ import 'collector/collector_requests_screen.dart';
 import 'rider/rider_dashboard_screen.dart';
 import 'rider/rider_jobs_screen.dart';
 import 'rider/rider_profile_screen.dart';
+import 'role_landing_screen.dart';
 
 /// Role-based navigation shell.
 ///
@@ -32,7 +33,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final appState = Provider.of<AppState>(context);
 
     if (!appState.isAuthenticated && !appState.isDemoSession) {
-      return const SizedBox.shrink();
+      // Session ended (user logout or expired JWT). The startup gate
+      // (SplashScreen) is no longer in the route stack after login —
+      // login replaced the stack with this shell — so return to the
+      // role entry screen here and clear the stack.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const RoleLandingScreen()),
+          (route) => false,
+        );
+      });
+      // Render the entry screen this frame so there is no blank flash
+      // between the session ending and the route replacement.
+      return const RoleLandingScreen();
     }
 
     if (appState.isCollector) {

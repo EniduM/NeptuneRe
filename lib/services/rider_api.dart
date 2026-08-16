@@ -1,4 +1,5 @@
 import '../models/api_models.dart';
+import '../config/mock_vehicles.dart';
 import 'api_client.dart';
 
 class RiderApi {
@@ -63,23 +64,12 @@ class RiderApi {
     );
   }
 
-  // ---------------------------------------------------------------------
-  // Vehicle picker for the completion step.
-  //
-  // Per NEPTUNE_API_HANDOVER.md the completion payload requires a vehicleId
-  // and there is no rider-specific vehicle API: the Rider selects an ACTIVE
-  // vehicle from the admin vehicle list (GET /admin/vehicles) at completion
-  // time and passes vehicleId in the complete call. Active vehicles are
-  // filtered client-side via Vehicle.isActive.
-  //
-  // NOTE: the current NestJS backend guards /admin/vehicles with the ADMIN
-  // role (riders receive 403). Until the backend team opens vehicle listing
-  // to RIDER, the picker surfaces that error instead of fabricated data.
-  // ---------------------------------------------------------------------
+  // PENDING BACKEND: no rider-accessible vehicle list endpoint exists yet
+  // (for example GET /rider/vehicles). Keep the picker functional with a
+  // local mock list and still submit { vehicleId, weightKg } to the real
+  // completion endpoint.
   Future<List<Vehicle>> vehicles() async {
-    final json = await _client.get('/admin/vehicles');
-    return (json as List)
-        .map((e) => Vehicle.fromJson(e as Map<String, dynamic>))
-        .toList();
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    return kMockVehicles;
   }
 }

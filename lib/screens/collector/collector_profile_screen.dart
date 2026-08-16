@@ -161,12 +161,14 @@ class CollectorProfileScreen extends StatelessWidget {
                       const Icon(Icons.qr_code_2_rounded,
                           color: AppTheme.primaryGreen, size: 22),
                       const SizedBox(width: 8),
-                      Text(
-                        'Your Permanent QR Code',
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.darkBlack,
+                      Flexible(
+                        child: Text(
+                          'Your Permanent QR Code',
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.darkBlack,
+                          ),
                         ),
                       ),
                     ],
@@ -222,14 +224,16 @@ class CollectorProfileScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'Your QR token is not exposed by the backend yet. Use your printed/issued QR card until then.',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.outfit(
-                              fontSize: 11,
-                              color: AppTheme.textMuted,
+                        Flexible(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              'Your QR token is not exposed by the backend yet. Use your printed/issued QR card until then.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.outfit(
+                                fontSize: 11,
+                                color: AppTheme.textMuted,
+                              ),
                             ),
                           ),
                         ),
@@ -255,7 +259,9 @@ class CollectorProfileScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               child: Column(
                 children: [
-                  ListTile(
+                  Material(
+                    type: MaterialType.transparency,
+                    child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
@@ -280,9 +286,12 @@ class CollectorProfileScreen extends StatelessWidget {
                         color: AppTheme.textMuted,
                       ),
                     ),
+                    ),
                   ),
                   const Divider(height: 1),
-                  ListTile(
+                  Material(
+                    type: MaterialType.transparency,
+                    child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
@@ -301,6 +310,7 @@ class CollectorProfileScreen extends StatelessWidget {
                       ),
                     ),
                     onTap: () => _showLogoutDialog(context, appState),
+                    ),
                   ),
                 ],
               ),

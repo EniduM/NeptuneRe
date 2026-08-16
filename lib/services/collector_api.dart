@@ -41,6 +41,7 @@ class CollectorApi {
 
   /// PATCH /collector/collection-requests/:id/cancel
   Future<CollectionRequest> cancelRequest(String id) async {
+    // Backend contract: this endpoint accepts an empty body.
     final json = await _client.patch('/collector/collection-requests/$id/cancel');
     return CollectionRequest.fromJson(json as Map<String, dynamic>);
   }

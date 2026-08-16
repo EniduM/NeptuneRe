@@ -153,6 +153,12 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
                         const SizedBox(height: 10),
                         _successRow(
                           Icons.receipt_long_rounded,
+                          'Request ID',
+                          _result!.request.id.substring(0, 8).toUpperCase(),
+                        ),
+                        const SizedBox(height: 10),
+                        _successRow(
+                          Icons.inventory_2_rounded,
                           'Collection ID',
                           _result!.collection.id.substring(0, 8).toUpperCase(),
                         ),
@@ -327,7 +333,7 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
                   const SizedBox(height: 20),
 
                   Text(
-                    'Vehicle Used',
+                    'Select Vehicle',
                     style: GoogleFonts.outfit(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
@@ -336,7 +342,7 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Select the vehicle you are using for this collection.',
+                    'Choose the vehicle used for this collection.',
                     style: GoogleFonts.outfit(
                       fontSize: 12,
                       color: AppTheme.textMuted,
@@ -378,11 +384,10 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
     );
   }
 
-  /// Vehicle picker backed by GET /admin/vehicles (see RiderApi.vehicles):
-  /// the Rider selects an ACTIVE vehicle at completion time and passes its
-  /// vehicleId in the complete call. The current backend guards the admin
-  /// vehicle list with the ADMIN role, so a 403 surfaces here until the
-  /// backend team opens it to RIDER.
+  /// PENDING BACKEND: no rider-accessible endpoint exists to list vehicles.
+  /// RiderApi.vehicles() currently returns a local mock list from
+  /// lib/config/mock_vehicles.dart, but completion still calls the real
+  /// POST /rider/collection-requests/:id/complete endpoint.
   Widget _buildVehiclePicker() {
     return AsyncView<List<Vehicle>>(
       future: _loadVehicles,

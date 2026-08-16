@@ -70,42 +70,44 @@ class NeptuneLogoFooter extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'NEPTUNE',
-                      style: GoogleFonts.outfit(
-                        color: AppTheme.darkBlack,
-                        fontSize: compact ? 12 : 14,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.2,
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'NEPTUNE',
+                        style: GoogleFonts.outfit(
+                          color: AppTheme.darkBlack,
+                          fontSize: compact ? 12 : 14,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'RECYCLERS',
-                      style: GoogleFonts.outfit(
-                        color: AppTheme.primaryGreen,
-                        fontSize: compact ? 12 : 14,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.2,
+                      const SizedBox(width: 4),
+                      Text(
+                        'RECYCLERS',
+                        style: GoogleFonts.outfit(
+                          color: AppTheme.primaryGreen,
+                          fontSize: compact ? 12 : 14,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Text(
-                  'Powering Kandy Smart Waste System',
-                  style: GoogleFonts.outfit(
-                    color: AppTheme.textMuted,
-                    fontSize: compact ? 9 : 10,
-                    fontWeight: FontWeight.w500,
+                    ],
                   ),
-                ),
-              ],
+                  Text(
+                    'Powering Kandy Smart Waste System',
+                    style: GoogleFonts.outfit(
+                      color: AppTheme.textMuted,
+                      fontSize: compact ? 9 : 10,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

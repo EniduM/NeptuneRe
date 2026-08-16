@@ -190,7 +190,9 @@ class RiderProfileScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               child: Column(
                 children: [
-                  ListTile(
+                  Material(
+                    type: MaterialType.transparency,
+                    child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
@@ -215,9 +217,12 @@ class RiderProfileScreen extends StatelessWidget {
                         color: AppTheme.textMuted,
                       ),
                     ),
+                    ),
                   ),
                   const Divider(height: 1),
-                  ListTile(
+                  Material(
+                    type: MaterialType.transparency,
+                    child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
@@ -236,6 +241,7 @@ class RiderProfileScreen extends StatelessWidget {
                       ),
                     ),
                     onTap: () => _showLogoutDialog(context, appState),
+                    ),
                   ),
                 ],
               ),

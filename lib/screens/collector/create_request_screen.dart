@@ -71,6 +71,8 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
     setState(() => _isSubmitting = true);
     try {
       final appState = Provider.of<AppState>(context, listen: false);
+      // Backend contract: POST /collector/collection-requests accepts only
+      // { latitude, longitude }.
       final created = await appState.api.collector.createRequest(
         latitude: _latitude!,
         longitude: _longitude!,
