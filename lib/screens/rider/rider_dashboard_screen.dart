@@ -49,15 +49,37 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
   Future<void> _accept(CollectionRequest request) async {
     if (_isAccepting) return;
+
+    debugPrint('========== ACCEPT PRESSED ==========');
+    debugPrint('Request ID: ${request.id}');
+    debugPrint('Request status: ${request.status}');
+
     setState(() => _isAccepting = true);
 
     CollectionRequest accepted;
+
     try {
+      debugPrint('========== SENDING ACCEPT API ==========');
+      debugPrint(
+        'PATCH /rider/collection-requests/${request.id}/accept',
+      );
+
       accepted = await context.read<AppState>().api.rider.acceptRequest(
-            request.id,
-          );
+        request.id,
+      );
+
+      debugPrint('========== ACCEPT API SUCCESS ==========');
+      debugPrint('Accepted request ID: ${accepted.id}');
+      debugPrint('Accepted request status: ${accepted.status}');
+      debugPrint('Accepted rider ID: ${accepted.riderId}');
     } on ApiException catch (e) {
+      debugPrint('========== ACCEPT API ERROR ==========');
+      debugPrint('Status: ${e.statusCode}');
+      debugPrint('Message: ${e.message}');
+      debugPrint('Network error: ${e.isNetworkError}');
+
       if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message),
@@ -65,24 +87,46 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-      // 409 (already accepted by another Rider) and other failures:
-      // refresh from the server instead of trusting any local state.
+
       setState(() {
         _isAccepting = false;
         _reloadTick++;
       });
+
+      return;
+    } catch (e, stackTrace) {
+      debugPrint('========== ACCEPT UNKNOWN ERROR ==========');
+      debugPrint('Error: $e');
+      debugPrint('Stack trace: $stackTrace');
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Accept failed: $e'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
       return;
     } finally {
-      if (mounted) setState(() => _isAccepting = false);
+      if (mounted) {
+        setState(() => _isAccepting = false);
+      }
     }
 
     if (!mounted) return;
+
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => RiderRequestWorkflowScreen(initialRequest: accepted),
+        builder: (_) => RiderRequestWorkflowScreen(
+          initialRequest: accepted,
+        ),
       ),
     );
+
     setState(() => _reloadTick++);
   }
 
