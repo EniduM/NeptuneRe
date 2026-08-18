@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../providers/app_state.dart';
 import '../theme/app_theme.dart';
-import '../theme/hexagon_clipper.dart';
 import '../widgets/liquid_glass.dart';
 import 'main_navigation_screen.dart';
 import 'role_landing_screen.dart';
@@ -25,23 +24,13 @@ class SplashScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(
-                  width: 64,
-                  height: 64,
-                  child: ClipPath(
-                    clipper: HexagonClipper(),
-                    child: DecoratedBox(
-                      decoration: const BoxDecoration(
-                        color: AppTheme.primaryGreen,
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.recycling_rounded,
-                          size: 34,
-                          color: AppTheme.pureWhite,
-                        ),
-                      ),
-                    ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset(
+                    'assets/images/neptune_logo.jpg',
+                    width: 88,
+                    height: 88,
+                    fit: BoxFit.contain,
                   ),
                 ),
                 const SizedBox(height: 20),

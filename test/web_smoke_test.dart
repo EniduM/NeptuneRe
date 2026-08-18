@@ -15,6 +15,7 @@ import 'package:neptune_recyclers/screens/rider/rider_profile_screen.dart';
 import 'package:neptune_recyclers/screens/rider/rider_qr_scan_screen.dart';
 import 'package:neptune_recyclers/screens/rider/rider_request_workflow_screen.dart';
 import 'package:neptune_recyclers/screens/rider/rider_weight_entry_screen.dart';
+import 'package:neptune_recyclers/screens/splash_screen.dart';
 import 'package:neptune_recyclers/services/api_client.dart';
 import 'package:neptune_recyclers/services/api_service.dart';
 import 'package:neptune_recyclers/services/token_storage.dart';
@@ -90,6 +91,16 @@ Map<String, dynamic> _request(String id, String status, {String? riderId}) => {
       ? null
       : {'id': 'r1', 'fullName': 'Kasun Perera', 'mobile': '+94772345678'},
 };
+
+/// Keeps the splash screen visible long enough to assert on while the
+/// session restore is still in flight.
+class SlowTokenStorage extends TokenStorage {
+  @override
+  Future<String?> readAccessToken() async {
+    await Future<void>.delayed(const Duration(seconds: 10));
+    return null;
+  }
+}
 
 class WebFakeApi extends ApiClient {
   WebFakeApi(TokenStorage storage)
@@ -421,5 +432,23 @@ void main() {
     final state = await riderState();
     await pump(tester, const RiderProfileScreen(), state);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('splash screen renders brand logo in Chrome', (tester) async {
+    size(tester);
+    final storage = SlowTokenStorage();
+    final state = AppState(
+      api: ApiService(WebFakeApi(storage)),
+      tokenStorage: storage,
+    );
+    await pump(tester, const SplashScreen(), state);
+    expect(find.text('NEPTUNE RECYCLERS'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((w) => w is Image && w.image is AssetImage),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+    // Flush the pending restore timer so the test teardown sees no timers.
+    await tester.pump(const Duration(seconds: 11));
   });
 }

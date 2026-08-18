@@ -1,29 +1,41 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Secure storage for the JWT access token (Keychain on iOS, Keystore/EncryptedSharedPreferences on Android).
+/// Persisted storage for the JWT access token.
+///
+/// Uses shared_preferences so the session survives app restarts on every
+/// platform (Android SharedPreferences XML, web localStorage). The JWT only
+/// lives 24h server-side, so the slight downgrade from Keychain/Keystore is
+/// an acceptable trade-off for reliable "stay logged in" behavior.
 class TokenStorage {
   static const String _accessTokenKey = 'neptune_access_token';
   static const String _loginIdKey = 'neptune_login_id';
 
-  final FlutterSecureStorage _storage;
+  const TokenStorage();
 
-  TokenStorage({FlutterSecureStorage? storage})
-    : _storage = storage ?? const FlutterSecureStorage();
+  Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
 
-  Future<String?> readAccessToken() => _storage.read(key: _accessTokenKey);
+  Future<String?> readAccessToken() async {
+    final prefs = await _prefs;
+    return prefs.getString(_accessTokenKey);
+  }
 
-  Future<String?> readLoginId() => _storage.read(key: _loginIdKey);
+  Future<String?> readLoginId() async {
+    final prefs = await _prefs;
+    return prefs.getString(_loginIdKey);
+  }
 
   Future<void> saveSession({
     required String accessToken,
     required String loginId,
   }) async {
-    await _storage.write(key: _accessTokenKey, value: accessToken);
-    await _storage.write(key: _loginIdKey, value: loginId);
+    final prefs = await _prefs;
+    await prefs.setString(_accessTokenKey, accessToken);
+    await prefs.setString(_loginIdKey, loginId);
   }
 
   Future<void> clearSession() async {
-    await _storage.delete(key: _accessTokenKey);
-    await _storage.delete(key: _loginIdKey);
+    final prefs = await _prefs;
+    await prefs.remove(_accessTokenKey);
+    await prefs.remove(_loginIdKey);
   }
 }
