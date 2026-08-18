@@ -1,5 +1,4 @@
 import '../models/api_models.dart';
-import '../config/mock_vehicles.dart';
 import 'api_client.dart';
 
 class RiderApi {
@@ -36,17 +35,18 @@ class RiderApi {
 
   /// Verify the Collector's permanent QR before completing a collection.
   ///
-  // PENDING BACKEND: there is no backend verification endpoint for this step
-  // (NEPTUNE_API_HANDOVER.md does not define one, and the NestJS backend has
-  // no /verify-qr route). This stub currently returns success so the flow can
-  // continue; replace the body with the real call once the backend team
-  // exposes an endpoint.
+  /// POST /rider/collection-requests/:id/verify-qr-token — the backend
+  /// matches the token against the request's collector and sets
+  /// qrVerified: true. A mismatch throws ApiException(409); the backend also
+  /// refuses to complete a request whose QR was not verified first.
   Future<void> verifyQrToken({
     required String requestId,
     required String qrToken,
   }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 600));
-    return;
+    await _client.post(
+      '/rider/collection-requests/$requestId/verify-qr-token',
+      body: {'qrToken': qrToken},
+    );
   }
 
   /// POST /rider/collection-requests/:id/complete
@@ -59,17 +59,19 @@ class RiderApi {
       '/rider/collection-requests/$requestId/complete',
       body: {'vehicleId': vehicleId, 'weightKg': weightKg},
     );
-    return CompleteCollectionResponse.fromJson(
-      json as Map<String, dynamic>,
-    );
+    return CompleteCollectionResponse.fromJson(json as Map<String, dynamic>);
   }
 
-  // PENDING BACKEND: no rider-accessible vehicle list endpoint exists yet
-  // (for example GET /rider/vehicles). Keep the picker functional with a
-  // local mock list and still submit { vehicleId, weightKg } to the real
-  // completion endpoint.
+  /// GET /rider/vehicles
+  ///
+  /// Vehicles are created by the ADMIN and their `id` is a backend UUID —
+  /// the completion endpoint rejects anything that is not a real vehicle id
+  /// ("Vehicle must be a UUID"), so the picker MUST use this list and never
+  /// locally fabricated ids.
   Future<List<Vehicle>> vehicles() async {
-    await Future<void>.delayed(const Duration(milliseconds: 250));
-    return kMockVehicles;
+    final json = await _client.get('/rider/vehicles');
+    return (json as List)
+        .map((e) => Vehicle.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

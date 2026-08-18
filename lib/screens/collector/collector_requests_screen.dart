@@ -32,7 +32,10 @@ class _CollectorRequestsScreenState extends State<CollectorRequestsScreen> {
         title: const Text('My Requests'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: AppTheme.primaryGreen),
+            icon: const Icon(
+              Icons.refresh_rounded,
+              color: AppTheme.primaryGreen,
+            ),
             tooltip: 'Refresh',
             onPressed: () => setState(() => _reloadTick++),
           ),
@@ -54,8 +57,7 @@ class _CollectorRequestsScreenState extends State<CollectorRequestsScreen> {
               .where((r) => r.status == RequestStatus.pending)
               .toList();
           return RefreshIndicator(
-            onRefresh: () async =>
-                setState(() => _reloadTick++),
+            onRefresh: () async => setState(() => _reloadTick++),
             child: ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
@@ -67,25 +69,25 @@ class _CollectorRequestsScreenState extends State<CollectorRequestsScreen> {
                     padding: const EdgeInsets.all(12),
                     borderRadius: BorderRadius.circular(14),
                     child: Row(
-                        children: [
-                          const Icon(
-                            Icons.hourglass_top_rounded,
-                            size: 16,
-                            color: AppTheme.primaryGreen,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              '${pending.length} request(s) waiting for a Rider',
-                              style: GoogleFonts.outfit(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryGreen,
-                              ),
+                      children: [
+                        const Icon(
+                          Icons.hourglass_top_rounded,
+                          size: 16,
+                          color: AppTheme.primaryGreen,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '${pending.length} request(s) waiting for a Rider',
+                            style: GoogleFonts.outfit(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryGreen,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
                   );
                 }
                 final request = requests[index - (pending.isEmpty ? 0 : 1)];
@@ -95,9 +97,8 @@ class _CollectorRequestsScreenState extends State<CollectorRequestsScreen> {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CollectorRequestDetailScreen(
-                          requestId: request.id,
-                        ),
+                        builder: (_) =>
+                            CollectorRequestDetailScreen(requestId: request.id),
                       ),
                     );
                     setState(() => _reloadTick++);

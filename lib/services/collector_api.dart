@@ -42,7 +42,23 @@ class CollectorApi {
   /// PATCH /collector/collection-requests/:id/cancel
   Future<CollectionRequest> cancelRequest(String id) async {
     // Backend contract: this endpoint accepts an empty body.
-    final json = await _client.patch('/collector/collection-requests/$id/cancel');
+    final json = await _client.patch(
+      '/collector/collection-requests/$id/cancel',
+    );
     return CollectionRequest.fromJson(json as Map<String, dynamic>);
+  }
+
+  /// GET /collector/leaderboard[?period=month]
+  ///
+  /// Real leaderboard data ranked by the backend. [period] of `'month'`
+  /// limits the totals to the current calendar month; omit for all time.
+  Future<List<LeaderboardEntry>> leaderboard({String? period}) async {
+    final json = await _client.get(
+      '/collector/leaderboard',
+      query: period == null ? null : {'period': period},
+    );
+    return (json as List)
+        .map((e) => LeaderboardEntry.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 }

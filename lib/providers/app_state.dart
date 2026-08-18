@@ -21,10 +21,8 @@ class AppState extends ChangeNotifier {
   bool _isRestoring = true;
   bool _isDemoSession = false;
 
-  AppState({
-    required this.api,
-    required TokenStorage tokenStorage,
-  })  : _tokenStorage = tokenStorage {
+  AppState({required this.api, required TokenStorage tokenStorage})
+    : _tokenStorage = tokenStorage {
     ApiClient.onUnauthorized = _handleSessionExpired;
     _restoreSession();
   }
@@ -66,16 +64,21 @@ class AppState extends ChangeNotifier {
     required String loginId,
     required String password,
   }) async {
-    final response = await api.auth.login(
-      loginId: loginId,
-      password: password,
-    );
+    final response = await api.auth.login(loginId: loginId, password: password);
     _accessToken = response.accessToken;
     _currentUser = response.user;
     await _tokenStorage.saveSession(
       accessToken: response.accessToken,
       loginId: response.user.loginId,
     );
+    // /auth/me is the canonical user source (carries collector qrToken).
+    // Refresh so fresh logins get the same fields as restored sessions;
+    // a failure here must never fail the login itself.
+    try {
+      _currentUser = await api.auth.me();
+    } on ApiException {
+      // Keep the login-response user.
+    }
     notifyListeners();
   }
 

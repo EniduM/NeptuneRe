@@ -5,8 +5,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/app_theme.dart';
-import '../theme/hexagon_clipper.dart';
 import 'liquid_glass.dart';
+import 'recycling_pin.dart';
 
 /// Interactive map showing a single collection location, with a button to
 /// open the location in the system maps app for navigation.
@@ -38,113 +38,93 @@ class RequestMapView extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       borderRadius: BorderRadius.circular(22),
       child: Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: SizedBox(
-            height: 220,
-            child: Stack(
-              children: [
-                FlutterMap(
-                  options: MapOptions(
-                    initialCenter: point,
-                    initialZoom: 15.5,
-                    minZoom: 3,
-                    maxZoom: 18,
-                    interactionOptions: const InteractionOptions(
-                      flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: SizedBox(
+              height: 220,
+              child: Stack(
+                children: [
+                  FlutterMap(
+                    options: MapOptions(
+                      initialCenter: point,
+                      initialZoom: 15.5,
+                      minZoom: 3,
+                      maxZoom: 18,
+                      interactionOptions: const InteractionOptions(
+                        flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                      ),
                     ),
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.neptune.recyclers',
-                    ),
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: point,
-                          width: 48,
-                          height: 48,
-                          child: Stack(
-                            children: [
-                              ClipPath(
-                                clipper: HexagonClipper(),
-                                child: Container(
-                                  color: AppTheme.primaryGreen,
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.recycling_rounded,
-                                      color: AppTheme.pureWhite,
-                                      size: 22,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              CustomPaint(
-                                size: const Size(48, 48),
-                                painter: HexagonBorderPainter(
-                                  color: AppTheme.lightGreen,
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            ],
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.neptune.recyclers',
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: point,
+                            width: 48,
+                            height: 48,
+                            child: const RecyclingPin(),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Positioned(
-                  bottom: 8,
-                  right: 8,
-                  child: FloatingActionButton.small(
-                    heroTag: 'openMapsToggle',
-                    backgroundColor: Colors.white.withValues(alpha: 0.85),
-                    foregroundColor: AppTheme.primaryGreen,
-                    onPressed: _openInMaps,
-                    tooltip: 'Open in Maps',
-                    child: const Icon(Icons.navigation_rounded),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: FloatingActionButton.small(
+                      heroTag: 'openMapsToggle',
+                      backgroundColor: Colors.white.withValues(alpha: 0.85),
+                      foregroundColor: AppTheme.primaryGreen,
+                      onPressed: _openInMaps,
+                      tooltip: 'Open in Maps',
+                      child: const Icon(Icons.navigation_rounded),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            const Icon(Icons.place_rounded,
-                size: 16, color: AppTheme.primaryGreen),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                label ??
-                    '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}',
-                style: GoogleFonts.outfit(
-                  fontSize: 12.5,
-                  color: AppTheme.textMuted,
-                  fontWeight: FontWeight.w600,
-                ),
-                overflow: TextOverflow.ellipsis,
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Icon(
+                Icons.place_rounded,
+                size: 16,
+                color: AppTheme.primaryGreen,
               ),
-            ),
-            TextButton.icon(
-              onPressed: _openInMaps,
-              icon: const Icon(Icons.directions_rounded, size: 16),
-              label: const Text('Navigate'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppTheme.primaryGreen,
-                textStyle: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label ??
+                      '${latitude.toStringAsFixed(6)}, ${longitude.toStringAsFixed(6)}',
+                  style: GoogleFonts.outfit(
+                    fontSize: 12.5,
+                    color: AppTheme.textMuted,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
+              TextButton.icon(
+                onPressed: _openInMaps,
+                icon: const Icon(Icons.directions_rounded, size: 16),
+                label: const Text('Navigate'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.primaryGreen,
+                  textStyle: GoogleFonts.outfit(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

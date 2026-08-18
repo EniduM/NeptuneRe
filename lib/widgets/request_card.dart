@@ -148,12 +148,16 @@ class RequestCard extends StatelessWidget {
                           color: AppTheme.primaryGreen,
                         ),
                         const SizedBox(width: 6),
-                        Text(
-                          'Rider: ${rider.fullName} (${rider.mobile})',
-                          style: GoogleFonts.outfit(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.primaryGreen,
+                        Flexible(
+                          child: Text(
+                            'Rider: ${rider.fullName} (${rider.mobile})',
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: GoogleFonts.outfit(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.primaryGreen,
+                            ),
                           ),
                         ),
                       ],

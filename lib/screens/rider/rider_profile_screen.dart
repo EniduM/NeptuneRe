@@ -155,12 +155,16 @@ class RiderProfileScreen extends StatelessWidget {
                       const Icon(Icons.route_rounded,
                           color: AppTheme.primaryGreen, size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        'How a collection works',
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: AppTheme.darkBlack,
+                      Expanded(
+                        child: Text(
+                          'How a collection works',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: AppTheme.darkBlack,
+                          ),
                         ),
                       ),
                     ],

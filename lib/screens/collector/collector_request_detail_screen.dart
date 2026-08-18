@@ -13,6 +13,7 @@ import '../../widgets/async_states.dart';
 import '../../widgets/liquid_glass.dart';
 import '../../widgets/request_map_view.dart';
 import '../../widgets/status_chip.dart';
+import 'collector_rider_track_screen.dart';
 
 /// Collector: track a single request with live status polling,
 /// timeline and cancellation (PENDING only).
@@ -37,12 +38,9 @@ class _CollectorRequestDetailScreenState
   @override
   void initState() {
     super.initState();
-    _poller = Timer.periodic(
-      const Duration(seconds: 20),
-      (_) {
-        if (mounted) setState(() => _reloadTick++);
-      },
-    );
+    _poller = Timer.periodic(const Duration(seconds: 20), (_) {
+      if (mounted) setState(() => _reloadTick++);
+    });
   }
 
   @override
@@ -109,8 +107,10 @@ class _CollectorRequestDetailScreenState
         title: const Text('Track Request'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded,
-                color: AppTheme.primaryGreen),
+            icon: const Icon(
+              Icons.refresh_rounded,
+              color: AppTheme.primaryGreen,
+            ),
             tooltip: 'Refresh',
             onPressed: () => setState(() => _reloadTick++),
           ),
@@ -135,6 +135,26 @@ class _CollectorRequestDetailScreenState
               _buildTimeline(request),
               const SizedBox(height: 16),
               _buildDetails(request),
+              if (request.status == RequestStatus.accepted) ...[
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              CollectorRiderTrackScreen(request: request),
+                        ),
+                      );
+                      if (mounted) setState(() => _reloadTick++);
+                    },
+                    icon: const Icon(Icons.two_wheeler_rounded, size: 20),
+                    label: const Text('Track Rider Live'),
+                  ),
+                ),
+              ],
               if (request.status == RequestStatus.pending) ...[
                 const SizedBox(height: 20),
                 SizedBox(
@@ -166,10 +186,7 @@ class _CollectorRequestDetailScreenState
         Expanded(
           child: Text(
             statusHint(request.status),
-            style: GoogleFonts.outfit(
-              fontSize: 13,
-              color: AppTheme.textMuted,
-            ),
+            style: GoogleFonts.outfit(fontSize: 13, color: AppTheme.textMuted),
           ),
         ),
       ],
@@ -268,21 +285,24 @@ class _CollectorRequestDetailScreenState
           child: Icon(icon, size: 15, color: color),
         ),
         const SizedBox(width: 12),
-        Text(
-          title,
-          style: GoogleFonts.outfit(
-            fontSize: 13.5,
-            fontWeight: FontWeight.w600,
-            color: active || error ? AppTheme.darkBlack : AppTheme.textMuted,
+        Expanded(
+          child: Text(
+            title,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: GoogleFonts.outfit(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: active || error
+                  ? AppTheme.darkBlack
+                  : AppTheme.textMuted,
+            ),
           ),
         ),
         const Spacer(),
         Text(
           time,
-          style: GoogleFonts.outfit(
-            fontSize: 11.5,
-            color: AppTheme.textMuted,
-          ),
+          style: GoogleFonts.outfit(fontSize: 11.5, color: AppTheme.textMuted),
         ),
       ],
     );
@@ -305,7 +325,11 @@ class _CollectorRequestDetailScreenState
             ),
           ),
           const SizedBox(height: 10),
-          _detailRow('Request ID', request.id.substring(0, 8).toUpperCase()),
+          _detailRow(
+            'Request ID',
+            (request.id.length > 8 ? request.id.substring(0, 8) : request.id)
+                .toUpperCase(),
+          ),
           _detailRow('Status', statusLabel(request.status)),
           _detailRow('Requested', formatDateTime(request.requestedAt)),
           if (rider != null) ...[

@@ -12,6 +12,7 @@ import '../../widgets/async_states.dart';
 import '../../widgets/liquid_glass.dart';
 import 'collector_request_detail_screen.dart';
 import 'create_request_screen.dart';
+import 'leaderboard_screen.dart';
 
 /// Collector dashboard: today's assignment, quick create CTA and a
 /// recent request summary.
@@ -34,7 +35,11 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
 
   Future<DailyAssignment?> _loadAssignment() async {
     try {
-      final assignment = await context.read<AppState>().api.collector.todayAssignment();
+      final assignment = await context
+          .read<AppState>()
+          .api
+          .collector
+          .todayAssignment();
       _assignmentError = null;
       if (!mounted) return assignment;
       setState(() {});
@@ -85,7 +90,10 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
         title: const Text('Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: AppTheme.primaryGreen),
+            icon: const Icon(
+              Icons.refresh_rounded,
+              color: AppTheme.primaryGreen,
+            ),
             tooltip: 'Refresh',
             onPressed: _refreshAll,
           ),
@@ -115,52 +123,52 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
-                children: [
-                  SizedBox(
-                    width: 54,
-                    height: 54,
-                    child: ClipPath(
-                      clipper: HexagonClipper(),
-                      child: Container(
-                        color: AppTheme.pureWhite,
-                        child: Center(
-                          child: Text(
-                            (user?.loginId ?? 'C').substring(0, 1),
-                            style: GoogleFonts.outfit(
-                              color: AppTheme.primaryGreen,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
+                  children: [
+                    SizedBox(
+                      width: 54,
+                      height: 54,
+                      child: ClipPath(
+                        clipper: HexagonClipper(),
+                        child: Container(
+                          color: AppTheme.pureWhite,
+                          child: Center(
+                            child: Text(
+                              (user?.loginId ?? 'C').substring(0, 1),
+                              style: GoogleFonts.outfit(
+                                color: AppTheme.primaryGreen,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 24,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hello, ${user?.loginId ?? ''}',
-                          style: GoogleFonts.outfit(
-                            color: AppTheme.pureWhite,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Hello, ${user?.loginId ?? ''}',
+                            style: GoogleFonts.outfit(
+                              color: AppTheme.pureWhite,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Collector • ${formatDate(DateTime.now())}',
-                          style: GoogleFonts.outfit(
-                            color: AppTheme.pureWhite.withValues(alpha: 0.9),
-                            fontSize: 13,
+                          const SizedBox(height: 2),
+                          Text(
+                            'Collector • ${formatDate(DateTime.now())}',
+                            style: GoogleFonts.outfit(
+                              color: AppTheme.pureWhite.withValues(alpha: 0.9),
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
                 ),
               ),
             ),
@@ -365,9 +373,8 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CollectorRequestDetailScreen(
-                          requestId: created.id,
-                        ),
+                        builder: (_) =>
+                            CollectorRequestDetailScreen(requestId: created.id),
                       ),
                     );
                   }
@@ -382,11 +389,40 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
             ),
             const SizedBox(height: 24),
 
+            // Leaderboard segment (real API data, refreshed with the page)
+            Row(
+              children: [
+                const Icon(
+                  Icons.emoji_events_rounded,
+                  color: AppTheme.primaryGreen,
+                  size: 22,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Leaderboard',
+                  style: GoogleFonts.outfit(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.darkBlack,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _LeaderboardSegment(
+              key: ValueKey('leaderboardSegment$_reloadTick'),
+              onRefresh: _refreshAll,
+            ),
+            const SizedBox(height: 16),
+
             // Recent requests
             Row(
               children: [
-                const Icon(Icons.history_rounded,
-                    color: AppTheme.primaryGreen, size: 22),
+                const Icon(
+                  Icons.history_rounded,
+                  color: AppTheme.primaryGreen,
+                  size: 22,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Recent Requests',
@@ -464,8 +500,11 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
       borderRadius: BorderRadius.circular(14),
       child: Row(
         children: [
-          const Icon(Icons.location_on_rounded,
-              size: 18, color: AppTheme.primaryGreen),
+          const Icon(
+            Icons.location_on_rounded,
+            size: 18,
+            color: AppTheme.primaryGreen,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -491,9 +530,390 @@ class _CollectorDashboardScreenState extends State<CollectorDashboardScreen> {
   }
 
   Color _statusColor(RequestStatus status) => switch (status) {
-        RequestStatus.pending => const Color(0xFFEF6C00),
-        RequestStatus.accepted => const Color(0xFF1565C0),
-        RequestStatus.completed => AppTheme.primaryGreen,
-        RequestStatus.cancelled => AppTheme.textMuted,
-      };
+    RequestStatus.pending => const Color(0xFFEF6C00),
+    RequestStatus.accepted => const Color(0xFF1565C0),
+    RequestStatus.completed => AppTheme.primaryGreen,
+    RequestStatus.cancelled => AppTheme.textMuted,
+  };
+}
+
+/// Live leaderboard segment for the dashboard: period toggle, top 5
+/// collectors, and a link to the full screen. Fetches
+/// `GET /collector/leaderboard[?period=month]` with the existing
+/// authenticated API client. Loading/error/empty states are contained
+/// inside the card so the rest of the dashboard stays usable.
+class _LeaderboardSegment extends StatefulWidget {
+  final VoidCallback onRefresh;
+
+  const _LeaderboardSegment({super.key, required this.onRefresh});
+
+  @override
+  State<_LeaderboardSegment> createState() => _LeaderboardSegmentState();
+}
+
+class _LeaderboardSegmentState extends State<_LeaderboardSegment> {
+  String? _period; // null = All Time, 'month' = This Month
+  late Future<List<LeaderboardEntry>> _future = _load();
+
+  Future<List<LeaderboardEntry>> _load() {
+    return context.read<AppState>().api.collector.leaderboard(period: _period);
+  }
+
+  void _retry() {
+    setState(() => _future = _load());
+  }
+
+  void _setPeriod(String? period) {
+    if (_period == period) return;
+    setState(() {
+      _period = period;
+      _future = _load();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LiquidGlassCard(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      borderRadius: BorderRadius.circular(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.emoji_events_rounded,
+                color: AppTheme.primaryGreen,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Collector Leaderboard',
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: AppTheme.darkBlack,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _SegmentPeriodChip(
+                label: 'All Time',
+                selected: _period == null,
+                onTap: () => _setPeriod(null),
+              ),
+              const SizedBox(width: 6),
+              _SegmentPeriodChip(
+                label: 'This Month',
+                selected: _period == 'month',
+                onTap: () => _setPeriod('month'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          FutureBuilder<List<LeaderboardEntry>>(
+            future: _future,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child: SizedBox(
+                      width: 26,
+                      height: 26,
+                      child: CircularProgressIndicator(
+                        color: AppTheme.primaryGreen,
+                        strokeWidth: 2.5,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              if (snapshot.hasError) {
+                return Column(
+                  children: [
+                    Text(
+                      'Unable to load leaderboard',
+                      style: GoogleFonts.outfit(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.darkBlack,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Check your connection and try again.',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: AppTheme.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: _retry,
+                      icon: const Icon(Icons.refresh_rounded, size: 16),
+                      label: Text(
+                        'Try Again',
+                        style: GoogleFonts.outfit(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ],
+                );
+              }
+              final entries = snapshot.data!;
+              if (entries.isEmpty) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'No completed collections yet',
+                      style: GoogleFonts.outfit(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.darkBlack,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Leaderboard rankings will appear once collectors start completing collections.',
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: AppTheme.textMuted,
+                      ),
+                    ),
+                  ],
+                );
+              }
+              final currentUser = context.read<AppState>().currentUser;
+              LeaderboardEntry? myEntry;
+              for (final entry in entries) {
+                if (entry.collectorId.isNotEmpty &&
+                    entry.collectorId == currentUser?.id) {
+                  myEntry = entry;
+                  break;
+                }
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final entry in entries.take(5)) ...[
+                    _buildMiniRow(entry, currentUser),
+                    const SizedBox(height: 6),
+                  ],
+                  if (myEntry != null && myEntry.rank > 5) ...[
+                    const Divider(height: 14),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.stars_rounded,
+                          color: AppTheme.primaryGreen,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Your Ranking',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.darkBlack,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '#${myEntry.rank} • ${myEntry.totalWeightKg.toStringAsFixed(1)} kg • ${myEntry.totalCollections} collections',
+                          style: GoogleFonts.outfit(
+                            fontSize: 12,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LeaderboardScreen(),
+                        ),
+                      );
+                      widget.onRefresh();
+                    },
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'View Full Leaderboard',
+                            style: GoogleFonts.outfit(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.primaryGreen,
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppTheme.primaryGreen,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniRow(LeaderboardEntry entry, AuthUser? currentUser) {
+    final isYou =
+        entry.collectorId.isNotEmpty && entry.collectorId == currentUser?.id;
+    final medal = _segmentMedalFor(entry.rank);
+    return Row(
+      children: [
+        Container(
+          width: 26,
+          height: 26,
+          decoration: BoxDecoration(
+            color: medal?.color ?? const Color(0xFFF1F5F9),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: medal != null
+                ? Icon(medal.icon, size: 13, color: AppTheme.pureWhite)
+                : Text(
+                    '${entry.rank}',
+                    style: GoogleFonts.outfit(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.darkBlack,
+                    ),
+                  ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      entry.fullName,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.outfit(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.darkBlack,
+                      ),
+                    ),
+                  ),
+                  if (isYou) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 1,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryGreen,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'You',
+                        style: GoogleFonts.outfit(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.pureWhite,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              Text(
+                '${entry.totalCollections} collections',
+                style: GoogleFonts.outfit(
+                  fontSize: 10.5,
+                  color: AppTheme.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Text(
+          '${entry.totalWeightKg.toStringAsFixed(1)} kg',
+          style: GoogleFonts.outfit(
+            fontSize: 13,
+            fontWeight: FontWeight.w900,
+            color: isYou ? AppTheme.primaryGreen : AppTheme.darkBlack,
+          ),
+        ),
+      ],
+    );
+  }
+
+  ({Color color, IconData icon})? _segmentMedalFor(int rank) {
+    return switch (rank) {
+      1 => (color: const Color(0xFFE6B93D), icon: Icons.emoji_events_rounded),
+      2 => (color: const Color(0xFF9AA5B1), icon: Icons.military_tech_rounded),
+      3 => (
+        color: const Color(0xFFC88A5A),
+        icon: Icons.workspace_premium_rounded,
+      ),
+      _ => null,
+    };
+  }
+}
+
+/// Compact pill toggle inside the dashboard leaderboard segment.
+class _SegmentPeriodChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SegmentPeriodChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? AppTheme.primaryGreen : AppTheme.mintGreen,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: selected
+                ? AppTheme.primaryGreen
+                : AppTheme.lightGreen.withValues(alpha: 0.6),
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.outfit(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: selected ? AppTheme.pureWhite : AppTheme.primaryGreen,
+          ),
+        ),
+      ),
+    );
+  }
 }

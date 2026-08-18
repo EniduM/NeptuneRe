@@ -11,7 +11,7 @@ class ApiService {
   final RiderApi rider;
 
   ApiService(this.client)
-      : auth = AuthApi(client),
-        collector = CollectorApi(client),
-        rider = RiderApi(client);
+    : auth = AuthApi(client),
+      collector = CollectorApi(client),
+      rider = RiderApi(client);
 }

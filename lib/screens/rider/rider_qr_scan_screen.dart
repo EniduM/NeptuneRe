@@ -10,8 +10,9 @@ import '../../theme/app_theme.dart';
 import '../../widgets/liquid_glass.dart';
 
 /// Rider: scan the Collector's permanent QR and verify it via
-/// RiderApi.verifyQrToken — a PENDING BACKEND stub (there is no backend
-/// verification endpoint yet); it returns success so the flow continues.
+/// RiderApi.verifyQrToken (POST .../verify-qr-token). The backend returns
+/// 200 and sets qrVerified: true on match, or 409 on mismatch — the app
+/// surfaces 409 as "This QR does not match the Collector for this request."
 ///
 /// Pops `true` when verification succeeds (returns to the workflow hub).
 class RiderQrScanScreen extends StatefulWidget {
@@ -62,11 +63,10 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
       _error = null;
     });
     try {
-      await context
-          .read<AppState>()
-          .api
-          .rider
-          .verifyQrToken(requestId: widget.request.id, qrToken: trimmed);
+      await context.read<AppState>().api.rider.verifyQrToken(
+        requestId: widget.request.id,
+        qrToken: trimmed,
+      );
       if (!mounted) return;
       setState(() => _verified = true);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -93,9 +93,7 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Verify Collector QR'),
-      ),
+      appBar: AppBar(title: const Text('Verify Collector QR')),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -143,8 +141,7 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
                             child: Icon(
                               Icons.qr_code_2_rounded,
                               size: 90,
-                              color:
-                                  AppTheme.lightGreen.withValues(alpha: 0.4),
+                              color: AppTheme.lightGreen.withValues(alpha: 0.4),
                             ),
                           ),
                         ),
@@ -156,7 +153,9 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
                         child: Center(
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: AppTheme.darkBlack.withValues(alpha: 0.6),
                               borderRadius: BorderRadius.circular(12),
@@ -187,29 +186,30 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
                       icon: Icons.verified_rounded,
                       color: AppTheme.primaryGreen,
                       title: 'Collector Verified',
-                      subtitle: 'Identity confirmed. You can now enter the weight.',
+                      subtitle:
+                          'Identity confirmed. You can now enter the weight.',
                     )
                   : _isVerifying
-                      ? _buildStatusCard(
-                          icon: Icons.hourglass_top_rounded,
-                          color: AppTheme.primaryGreen,
-                          title: 'Verifying…',
-                          subtitle: 'Checking QR token with the server.',
-                        )
-                      : _error != null
-                          ? _buildStatusCard(
-                              icon: Icons.error_rounded,
-                              color: Colors.redAccent,
-                              title: 'Verification Failed',
-                              subtitle: _error!,
-                            )
-                          : _buildStatusCard(
-                              icon: Icons.qr_code_scanner_rounded,
-                              color: AppTheme.textMuted,
-                              title: 'Scan the Collector\'s permanent QR',
-                              subtitle:
-                                  'The QR card must belong to the Collector linked to this request.',
-                            ),
+                  ? _buildStatusCard(
+                      icon: Icons.hourglass_top_rounded,
+                      color: AppTheme.primaryGreen,
+                      title: 'Verifying…',
+                      subtitle: 'Checking QR token with the server.',
+                    )
+                  : _error != null
+                  ? _buildStatusCard(
+                      icon: Icons.error_rounded,
+                      color: Colors.redAccent,
+                      title: 'Verification Failed',
+                      subtitle: _error!,
+                    )
+                  : _buildStatusCard(
+                      icon: Icons.qr_code_scanner_rounded,
+                      color: AppTheme.textMuted,
+                      title: 'Scan the Collector\'s permanent QR',
+                      subtitle:
+                          'The QR card must belong to the Collector linked to this request.',
+                    ),
             ),
 
             // Manual entry fallback
@@ -222,15 +222,22 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.keyboard_rounded,
-                          color: AppTheme.primaryGreen, size: 18),
+                      const Icon(
+                        Icons.keyboard_rounded,
+                        color: AppTheme.primaryGreen,
+                        size: 18,
+                      ),
                       const SizedBox(width: 6),
-                      Text(
-                        'Manual QR input (if scanning fails):',
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: AppTheme.primaryGreen,
+                      Expanded(
+                        child: Text(
+                          'Manual QR input (if scanning fails):',
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: GoogleFonts.outfit(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: AppTheme.primaryGreen,
+                          ),
                         ),
                       ),
                     ],
@@ -246,7 +253,9 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
                             hintText: 'Paste or type the QR token',
                             isDense: true,
                             contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
                           ),
                         ),
                       ),
@@ -303,33 +312,33 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
         padding: const EdgeInsets.all(14),
         borderRadius: BorderRadius.circular(14),
         child: Row(
-        children: [
-          Icon(icon, color: color, size: 26),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: AppTheme.darkBlack,
+          children: [
+            Icon(icon, color: color, size: 26),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: AppTheme.darkBlack,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.outfit(
-                    fontSize: 12,
-                    color: AppTheme.textMuted,
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.outfit(
+                      fontSize: 12,
+                      color: AppTheme.textMuted,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
         ),
       ),
     );
@@ -383,10 +392,7 @@ class _RiderQrScanScreenState extends State<RiderQrScanScreen> {
             const SizedBox(height: 4),
             Text(
               'Or type the QR token below',
-              style: GoogleFonts.outfit(
-                color: Colors.white70,
-                fontSize: 11,
-              ),
+              style: GoogleFonts.outfit(color: Colors.white70, fontSize: 11),
             ),
           ],
         ),

@@ -32,10 +32,7 @@ class ApiClient {
   final String baseUrl;
   final Future<String?> Function() tokenProvider;
 
-  ApiClient({
-    required this.baseUrl,
-    required this.tokenProvider,
-  });
+  ApiClient({required this.baseUrl, required this.tokenProvider});
 
   static ApiClient? _instance;
 
@@ -82,19 +79,17 @@ class ApiClient {
   }) async {
     final uri = _uri(path).replace(queryParameters: query);
     final response = await _send(
-      () async => http.get(
-        uri,
-        headers: await _headers(authenticated: authenticated),
-      ),
+      () async =>
+          http.get(uri, headers: await _headers(authenticated: authenticated)),
     );
     return _decode(response, authenticated: authenticated);
   }
 
   Future<dynamic> post(
-      String path, {
-        Object? body,
-        bool authenticated = true,
-      }) async {
+    String path, {
+    Object? body,
+    bool authenticated = true,
+  }) async {
     final uri = _uri(path);
     final headers = await _headers(authenticated: authenticated);
 
@@ -124,9 +119,7 @@ class ApiClient {
     return _decode(response, authenticated: authenticated);
   }
 
-  Future<http.Response> _send(
-    Future<http.Response> Function() request,
-  ) async {
+  Future<http.Response> _send(Future<http.Response> Function() request) async {
     try {
       return await request().timeout(const Duration(seconds: 20));
     } on TimeoutException {
@@ -135,18 +128,13 @@ class ApiClient {
         isNetworkError: true,
       );
     } on SocketException catch (e) {
-      throw ApiException(
-        message: formatNetworkError(e),
-        isNetworkError: true,
-      );
+      throw ApiException(message: formatNetworkError(e), isNetworkError: true);
     } on http.ClientException catch (e) {
-      throw ApiException(
-        message: formatNetworkError(e),
-        isNetworkError: true,
-      );
+      throw ApiException(message: formatNetworkError(e), isNetworkError: true);
     } on Exception catch (e) {
       throw ApiException(
-        message: 'Unable to reach the server. Check your connection. Details: $e',
+        message:
+            'Unable to reach the server. Check your connection. Details: $e',
         isNetworkError: true,
       );
     }
@@ -186,7 +174,8 @@ class ApiClient {
 
   dynamic _decode(http.Response response, {bool authenticated = false}) {
     final status = response.statusCode;
-    final body = (response.body.isEmpty ||
+    final body =
+        (response.body.isEmpty ||
             response.headers['content-type']?.contains('json') == false)
         ? null
         : _tryDecodeJson(response.body);
@@ -199,10 +188,7 @@ class ApiClient {
       onUnauthorized?.call();
     }
 
-    throw ApiException(
-      statusCode: status,
-      message: _messageFor(status, body),
-    );
+    throw ApiException(statusCode: status, message: _messageFor(status, body));
   }
 
   dynamic _tryDecodeJson(String body) {

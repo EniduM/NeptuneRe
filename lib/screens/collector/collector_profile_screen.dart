@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../providers/app_state.dart';
 import '../../theme/app_theme.dart';
@@ -9,11 +10,10 @@ import '../../widgets/liquid_glass.dart';
 
 /// Collector profile: identity from /auth/me and the permanent QR section.
 ///
-/// The Collector's permanent QR encodes their `qrToken`. The backend does
-/// not currently expose the collector's own qrToken through any collector
-/// endpoint (it is admin-only today). This section is wired to render the QR
-/// from `qrToken` as soon as an API field provides it; until then a clear
-/// "not available" state is shown instead of fabricated data.
+/// The Collector's permanent QR encodes their `qrToken` — returned by the
+/// backend in `GET /auth/me` (and `GET /collector/me`). The QR value the
+/// Rider scans is exactly this token, verified server-side; collectors
+/// without a token (old accounts, demo mode) see the fallback UI.
 class CollectorProfileScreen extends StatelessWidget {
   const CollectorProfileScreen({super.key});
 
@@ -24,9 +24,7 @@ class CollectorProfileScreen extends StatelessWidget {
 
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Collector Profile'),
-        ),
+        appBar: AppBar(title: const Text('Collector Profile')),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -158,8 +156,11 @@ class CollectorProfileScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.qr_code_2_rounded,
-                          color: AppTheme.primaryGreen, size: 22),
+                      const Icon(
+                        Icons.qr_code_2_rounded,
+                        color: AppTheme.primaryGreen,
+                        size: 22,
+                      ),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
@@ -183,63 +184,83 @@ class CollectorProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // QR availability state.
-                  //
-                  // The backend currently has no collector-facing endpoint
-                  // that returns this collector's qrToken (it is managed via
-                  // ADMIN APIs). When a collector API exposes `qrToken`,
-                  // render QrImageView(data: qrToken) here — the QR value the
-                  // Rider scans is exactly this token, verified by the
-                  // PENDING BACKEND stub RiderApi.verifyQrToken.
-                  Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: AppTheme.cardBg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE5E7EB)),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFEE2E2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.qr_code_2_rounded,
-                            size: 32,
-                            color: Colors.redAccent,
-                          ),
+                  // QR availability state: the backend exposes the
+                  // collector's permanent qrToken via GET /auth/me (and
+                  // GET /collector/me). Render the exact token value —
+                  // the Rider-side verification endpoint matches against
+                  // this string, so it must never be fabricated/hashed
+                  // client-side. Collectors without a token (old accounts,
+                  // demo mode) keep the fallback UI below.
+                  if (user.qrToken != null)
+                    Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: AppTheme.cardBg,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
+                      ),
+                      child: Center(
+                        child: QrImageView(
+                          data: user.qrToken!,
+                          size: 176,
+                          padding: const EdgeInsets.all(6),
+                          backgroundColor: AppTheme.pureWhite,
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'QR code unavailable',
-                          style: GoogleFonts.outfit(
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.darkBlack,
+                      ),
+                    )
+                  else
+                    Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: AppTheme.cardBg,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEE2E2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.qr_code_2_rounded,
+                              size: 32,
+                              color: Colors.redAccent,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              'Your QR token is not exposed by the backend yet. Use your printed/issued QR card until then.',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.outfit(
-                                fontSize: 11,
-                                color: AppTheme.textMuted,
+                          const SizedBox(height: 10),
+                          Text(
+                            'QR code unavailable',
+                            style: GoogleFonts.outfit(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.darkBlack,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Flexible(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: Text(
+                                'Your QR token is not exposed by the backend yet. Use your printed/issued QR card until then.',
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.outfit(
+                                  fontSize: 11,
+                                  color: AppTheme.textMuted,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 14),
                   Text(
                     'QR scanning is performed by Riders only.',
@@ -262,54 +283,58 @@ class CollectorProfileScreen extends StatelessWidget {
                   Material(
                     type: MaterialType.transparency,
                     child: ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppTheme.mintGreen,
-                        borderRadius: BorderRadius.circular(12),
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppTheme.mintGreen,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.verified_user_rounded,
+                          color: AppTheme.primaryGreen,
+                        ),
                       ),
-                      child: const Icon(Icons.verified_user_rounded,
-                          color: AppTheme.primaryGreen),
-                    ),
-                    title: Text(
-                      'Account Status',
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: AppTheme.darkBlack,
+                      title: Text(
+                        'Account Status',
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: AppTheme.darkBlack,
+                        ),
                       ),
-                    ),
-                    subtitle: Text(
-                      user.status,
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        color: AppTheme.textMuted,
+                      subtitle: Text(
+                        user.status,
+                        style: GoogleFonts.outfit(
+                          fontSize: 12,
+                          color: AppTheme.textMuted,
+                        ),
                       ),
-                    ),
                     ),
                   ),
                   const Divider(height: 1),
                   Material(
                     type: MaterialType.transparency,
                     child: ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEE2E2),
-                        borderRadius: BorderRadius.circular(12),
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEE2E2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.logout_rounded,
+                          color: Colors.redAccent,
+                        ),
                       ),
-                      child: const Icon(Icons.logout_rounded,
-                          color: Colors.redAccent),
-                    ),
-                    title: Text(
-                      'Logout of Account',
-                      style: GoogleFonts.outfit(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: Colors.redAccent,
+                      title: Text(
+                        'Logout of Account',
+                        style: GoogleFonts.outfit(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Colors.redAccent,
+                        ),
                       ),
-                    ),
-                    onTap: () => _showLogoutDialog(context, appState),
+                      onTap: () => _showLogoutDialog(context, appState),
                     ),
                   ),
                 ],

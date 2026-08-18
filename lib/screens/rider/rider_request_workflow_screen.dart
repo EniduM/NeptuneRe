@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +7,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../models/api_models.dart';
 import '../../providers/app_state.dart';
+import '../../services/live_location_service.dart';
+import '../../services/maps_launcher.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/hexagon_clipper.dart';
 import '../../utils/formatters.dart';
@@ -33,18 +37,45 @@ class _RiderRequestWorkflowScreenState
     extends State<RiderRequestWorkflowScreen> {
   int _reloadTick = 0;
   bool _qrVerified = false;
+  RequestStatus? _lastSeenStatus;
+  Timer? _statusPoller;
 
   Future<CollectionRequest> _load() =>
       context.read<AppState>().api.rider.getRequest(widget.initialRequest.id);
 
+  @override
+  void initState() {
+    super.initState();
+    // Watch for the request leaving ACCEPTED (completed/cancelled by the
+    // Collector) so live location sharing stops exactly at that moment.
+    _statusPoller = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) setState(() => _reloadTick++);
+    });
+  }
+
+  @override
+  void dispose() {
+    _statusPoller?.cancel();
+    LiveLocationService.instance.stopSharing();
+    super.dispose();
+  }
+
+  /// Starts sharing this rider's live position while the request is ACCEPTED
+  /// and stops the moment it is completed or cancelled. Idempotent per
+  /// [LiveLocationService], safe to call from every build.
+  void _syncLocationSharing(CollectionRequest request) {
+    if (request.status == RequestStatus.accepted) {
+      LiveLocationService.instance.startSharing(requestId: request.id);
+    } else if (_lastSeenStatus == RequestStatus.accepted) {
+      LiveLocationService.instance.stopSharing();
+    }
+    _lastSeenStatus = request.status;
+  }
+
   Future<void> _openQrScanner(CollectionRequest request) async {
     final verified = await Navigator.push<bool>(
       context,
-      MaterialPageRoute(
-        builder: (_) => RiderQrScanScreen(
-          request: request,
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => RiderQrScanScreen(request: request)),
     );
     if (!mounted) return;
     if (verified == true) {
@@ -59,10 +90,8 @@ class _RiderRequestWorkflowScreenState
     await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (_) => RiderWeightEntryScreen(
-          request: request,
-          qrVerified: _qrVerified,
-        ),
+        builder: (_) =>
+            RiderWeightEntryScreen(request: request, qrVerified: _qrVerified),
       ),
     );
     if (!mounted) return;
@@ -78,119 +107,189 @@ class _RiderRequestWorkflowScreenState
         title: const Text('Collection Workflow'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded,
-                color: AppTheme.primaryGreen),
+            icon: const Icon(
+              Icons.refresh_rounded,
+              color: AppTheme.primaryGreen,
+            ),
             tooltip: 'Refresh',
             onPressed: () => setState(() => _reloadTick++),
           ),
         ],
       ),
-      body: AsyncView<CollectionRequest>(
-        key: ValueKey(_reloadTick),
-        future: _load,
-        loadingMessage: 'Loading request…',
-        builder: (context, request) {
-          if (request.status == RequestStatus.completed) {
-            return _buildCompletedView(request);
-          }
-          if (request.status == RequestStatus.cancelled) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Text(
-                  'This request was cancelled by the Collector.\n\nPlease pick another job.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15),
-                ),
-              ),
-            );
-          }
-
-          return ListView(
-            padding: const EdgeInsets.all(16),
+      body: ValueListenableBuilder<String?>(
+        valueListenable: LiveLocationService.instance.sharingError,
+        builder: (context, sharingError, child) {
+          return Column(
             children: [
-              _buildHeader(request),
-              const SizedBox(height: 16),
-              RequestMapView(
-                latitude: request.latitude,
-                longitude: request.longitude,
-                label: 'Collector location — drive here to start',
-              ),
-              const SizedBox(height: 16),
-              _buildCollectorCard(request),
-              const SizedBox(height: 20),
-              Text(
-                'How to complete this collection',
-                style: GoogleFonts.outfit(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.darkBlack,
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              // Step 1 — Navigate (always available)
-              _buildStep(
-                index: 1,
-                icon: Icons.navigation_rounded,
-                title: 'Go to the Collector location',
-                subtitle:
-                    'Use the map above or "Navigate" to open turn-by-turn directions.',
-                done: true,
-              ),
-              const SizedBox(height: 8),
-
-              // Step 2 — Scan QR
-              _buildStep(
-                index: 2,
-                icon: Icons.qr_code_scanner_rounded,
-                title: 'Scan the Collector\'s QR',
-                subtitle: _qrVerified
-                    ? 'QR verified against the Collector profile.'
-                    : 'Scan their permanent QR card to verify identity.',
-                done: _qrVerified,
-                trailing: _qrVerified
-                    ? null
-                    : SizedBox(
-                        height: 40,
-                        child: ElevatedButton.icon(
-                          onPressed: () => _openQrScanner(request),
-                          icon: const Icon(Icons.qr_code_scanner_rounded,
-                              size: 17),
-                          label: Text(
-                            'Scan QR',
-                            style: GoogleFonts.outfit(
-                              fontWeight: FontWeight.w800,
-                            ),
+              if (sharingError != null)
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEE2E2),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.cloud_off_rounded,
+                        color: Colors.redAccent,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          sharingError,
+                          style: GoogleFonts.outfit(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF9F1239),
                           ),
                         ),
                       ),
-              ),
-              const SizedBox(height: 8),
-
-              // Step 3 — Weight + Complete
-              _buildStep(
-                index: 3,
-                icon: Icons.monitor_weight_rounded,
-                title: 'Enter total weight (kg)',
-                subtitle: 'Enter the total waste weight collected.',
-                done: request.status == RequestStatus.completed,
-                trailing: SizedBox(
-                  height: 40,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _openWeightEntry(request),
-                    icon: const Icon(Icons.check_circle_outline_rounded,
-                        size: 17),
-                    label: Text(
-                      request.status == RequestStatus.completed
-                          ? 'Completed'
-                          : 'Enter Weight',
-                      style: GoogleFonts.outfit(fontWeight: FontWeight.w800),
-                    ),
+                    ],
                   ),
                 ),
+              Expanded(
+                child: AsyncView<CollectionRequest>(
+                  key: ValueKey(_reloadTick),
+                  future: _load,
+                  loadingMessage: 'Loading request…',
+                  builder: (context, request) {
+                    _syncLocationSharing(request);
+                    if (request.status == RequestStatus.completed) {
+                      return _buildCompletedView(request);
+                    }
+                    if (request.status == RequestStatus.cancelled) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(32),
+                          child: Text(
+                            'This request was cancelled by the Collector.\n\nPlease pick another job.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 15),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        _buildHeader(request),
+                        const SizedBox(height: 16),
+                        RequestMapView(
+                          latitude: request.latitude,
+                          longitude: request.longitude,
+                          label: 'Collector location — drive here to start',
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 52,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _openInMaps(request),
+                            icon: const Icon(
+                              Icons.navigation_rounded,
+                              size: 20,
+                            ),
+                            label: Text(
+                              'Navigate to Collector',
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _buildCollectorCard(request),
+                        const SizedBox(height: 20),
+                        Text(
+                          'How to complete this collection',
+                          style: GoogleFonts.outfit(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.darkBlack,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Step 1 — Navigate (always available)
+                        _buildStep(
+                          index: 1,
+                          icon: Icons.navigation_rounded,
+                          title: 'Go to the Collector location',
+                          subtitle:
+                              'Use the map above or "Navigate" to open turn-by-turn directions.',
+                          done: true,
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Step 2 — Scan QR
+                        _buildStep(
+                          index: 2,
+                          icon: Icons.qr_code_scanner_rounded,
+                          title: 'Scan the Collector\'s QR',
+                          subtitle: _qrVerified
+                              ? 'QR verified against the Collector profile.'
+                              : 'Scan their permanent QR card to verify identity.',
+                          done: _qrVerified,
+                          trailing: _qrVerified
+                              ? null
+                              : SizedBox(
+                                  height: 40,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () => _openQrScanner(request),
+                                    icon: const Icon(
+                                      Icons.qr_code_scanner_rounded,
+                                      size: 17,
+                                    ),
+                                    label: Text(
+                                      'Scan QR',
+                                      style: GoogleFonts.outfit(
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Step 3 — Weight + Complete
+                        _buildStep(
+                          index: 3,
+                          icon: Icons.monitor_weight_rounded,
+                          title: 'Enter total weight (kg)',
+                          subtitle: 'Enter the total waste weight collected.',
+                          done: request.status == RequestStatus.completed,
+                          trailing: SizedBox(
+                            height: 40,
+                            child: ElevatedButton.icon(
+                              onPressed: () => _openWeightEntry(request),
+                              icon: const Icon(
+                                Icons.check_circle_outline_rounded,
+                                size: 17,
+                              ),
+                              label: Text(
+                                request.status == RequestStatus.completed
+                                    ? 'Completed'
+                                    : 'Enter Weight',
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    );
+                  },
+                ),
               ),
-              const SizedBox(height: 24),
             ],
           );
         },
@@ -206,10 +305,7 @@ class _RiderRequestWorkflowScreenState
         Expanded(
           child: Text(
             statusHint(request.status),
-            style: GoogleFonts.outfit(
-              fontSize: 13,
-              color: AppTheme.textMuted,
-            ),
+            style: GoogleFonts.outfit(fontSize: 13, color: AppTheme.textMuted),
           ),
         ),
       ],
@@ -307,6 +403,25 @@ class _RiderRequestWorkflowScreenState
     }
   }
 
+  /// Hands off to the device's native maps app for turn-by-turn navigation
+  /// to the pickup coordinates. Shows an error message if no maps app can
+  /// be launched.
+  Future<void> _openInMaps(CollectionRequest request) async {
+    final error = await MapsLauncher.openDirections(
+      latitude: request.latitude,
+      longitude: request.longitude,
+    );
+    if (error != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   Widget _buildStep({
     required int index,
     required IconData icon,
@@ -330,8 +445,11 @@ class _RiderRequestWorkflowScreenState
               shape: BoxShape.circle,
             ),
             child: done
-                ? const Icon(Icons.check_rounded,
-                    color: AppTheme.pureWhite, size: 18)
+                ? const Icon(
+                    Icons.check_rounded,
+                    color: AppTheme.pureWhite,
+                    size: 18,
+                  )
                 : Center(
                     child: Text(
                       '$index',
@@ -370,10 +488,7 @@ class _RiderRequestWorkflowScreenState
                     color: AppTheme.textMuted,
                   ),
                 ),
-                if (trailing != null) ...[
-                  const SizedBox(height: 10),
-                  trailing,
-                ],
+                if (trailing != null) ...[const SizedBox(height: 10), trailing],
               ],
             ),
           ),
@@ -395,10 +510,7 @@ class _RiderRequestWorkflowScreenState
               decoration: BoxDecoration(
                 color: AppTheme.mintGreen,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppTheme.primaryGreen,
-                  width: 3,
-                ),
+                border: Border.all(color: AppTheme.primaryGreen, width: 3),
               ),
               child: const Icon(
                 Icons.check_rounded,

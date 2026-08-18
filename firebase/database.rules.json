@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "liveLocations": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$requestId": {
+        ".read": "auth != null",
+        ".write": "auth != null && newData.child('lat').isNumber() && newData.child('lng').isNumber() && newData.child('updatedAt').isNumber()"
+      }
+    }
+  }
+}

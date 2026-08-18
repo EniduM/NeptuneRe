@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "406030063656",
+    "firebase_url": "https://neptune-recyclers-live-default-rtdb.firebaseio.com",
+    "project_id": "neptune-recyclers-live",
+    "storage_bucket": "neptune-recyclers-live.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406030063656:android:a6d46a5ea7dacf8344fd1d",
+        "android_client_info": {
+          "package_name": "com.neptune.neptune_recyclers"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA58FNx2ZitNmnT8K0SkZ8yQmslQkBKsU0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

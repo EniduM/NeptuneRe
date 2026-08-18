@@ -64,10 +64,10 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
     try {
       final weight = double.parse(_weightController.text.trim());
       final completed = await context.read<AppState>().api.rider.complete(
-            requestId: widget.request.id,
-            vehicleId: _selectedVehicle!.id,
-            weightKg: weight,
-          );
+        requestId: widget.request.id,
+        vehicleId: _selectedVehicle!.id,
+        weightKg: weight,
+      );
       if (!mounted) return;
       setState(() {
         _result = completed;
@@ -104,8 +104,7 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
                   decoration: BoxDecoration(
                     color: AppTheme.mintGreen,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                        color: AppTheme.primaryGreen, width: 3),
+                    border: Border.all(color: AppTheme.primaryGreen, width: 3),
                   ),
                   child: const Icon(
                     Icons.check_rounded,
@@ -154,13 +153,13 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
                         _successRow(
                           Icons.receipt_long_rounded,
                           'Request ID',
-                          _result!.request.id.substring(0, 8).toUpperCase(),
+                          _shortId(_result!.request.id),
                         ),
                         const SizedBox(height: 10),
                         _successRow(
                           Icons.inventory_2_rounded,
                           'Collection ID',
-                          _result!.collection.id.substring(0, 8).toUpperCase(),
+                          _shortId(_result!.collection.id),
                         ),
                         const SizedBox(height: 10),
                         _successRow(
@@ -210,9 +209,9 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
                         child: Center(
                           child: Text(
                             (widget.request.collector?.fullName ?? 'C')
-                                .isNotEmpty
+                                    .isNotEmpty
                                 ? (widget.request.collector!.fullName)[0]
-                                    .toUpperCase()
+                                      .toUpperCase()
                                 : 'C',
                             style: GoogleFonts.outfit(
                               color: AppTheme.pureWhite,
@@ -250,15 +249,20 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.mintGreen,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.verified_rounded,
-                            size: 14, color: AppTheme.primaryGreen),
+                        const Icon(
+                          Icons.verified_rounded,
+                          size: 14,
+                          color: AppTheme.primaryGreen,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           widget.qrVerified ? 'QR OK' : 'QR NOT VERIFIED',
@@ -302,13 +306,16 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _weightController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     decoration: InputDecoration(
                       labelText: 'Weight in kg',
                       hintText: 'e.g. 45.5',
-                      prefixIcon: const Icon(Icons.monitor_weight_outlined,
-                          color: AppTheme.primaryGreen),
+                      prefixIcon: const Icon(
+                        Icons.monitor_weight_outlined,
+                        color: AppTheme.primaryGreen,
+                      ),
                       suffixText: 'kg',
                       suffixStyle: GoogleFonts.outfit(
                         fontWeight: FontWeight.bold,
@@ -367,9 +374,7 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
                             )
                           : const Icon(Icons.check_circle_rounded),
                       label: Text(
-                        _isSubmitting
-                            ? 'Completing…'
-                            : 'Complete Collection',
+                        _isSubmitting ? 'Completing…' : 'Complete Collection',
                         style: GoogleFonts.outfit(fontWeight: FontWeight.w800),
                       ),
                     ),
@@ -384,10 +389,9 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
     );
   }
 
-  /// PENDING BACKEND: no rider-accessible endpoint exists to list vehicles.
-  /// RiderApi.vehicles() currently returns a local mock list from
-  /// lib/config/mock_vehicles.dart, but completion still calls the real
-  /// POST /rider/collection-requests/:id/complete endpoint.
+  /// Vehicles come from the real GET /rider/vehicles endpoint (admin-created
+  /// records with backend UUID ids). The empty/error state below covers the
+  /// case where the admin has not added any vehicle yet.
   Widget _buildVehiclePicker() {
     return AsyncView<List<Vehicle>>(
       future: _loadVehicles,
@@ -403,8 +407,11 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.warning_amber_rounded,
-                        color: Color(0xFFB45309), size: 20),
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      color: Color(0xFFB45309),
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'No active vehicles available',
@@ -433,8 +440,10 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
           isExpanded: true,
           decoration: const InputDecoration(
             labelText: 'Vehicle',
-            prefixIcon: Icon(Icons.local_shipping_outlined,
-                color: AppTheme.primaryGreen),
+            prefixIcon: Icon(
+              Icons.local_shipping_outlined,
+              color: AppTheme.primaryGreen,
+            ),
           ),
           items: [
             for (final vehicle in active)
@@ -451,6 +460,11 @@ class _RiderWeightEntryScreenState extends State<RiderWeightEntryScreen> {
         );
       },
     );
+  }
+
+  String _shortId(String id) {
+    final short = id.length > 8 ? id.substring(0, 8) : id;
+    return short.toUpperCase();
   }
 
   Widget _successRow(IconData icon, String label, String value) {
