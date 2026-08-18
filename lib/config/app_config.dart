@@ -41,7 +41,7 @@ class AppConfig {
       return 'https://web-two-ebon-72.vercel.app/api';
     }
 
-    return 'https://neptune-backend-kappa.vercel.app';
+    return 'https://backend-neptune.vercel.app';
   }
 
   /// Access token validity on the backend.

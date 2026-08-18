@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://neptune-backend-kappa.vercel.app/:path*"
+      "destination": "https://backend-neptune.vercel.app/:path*"
     }
   ]
 }
